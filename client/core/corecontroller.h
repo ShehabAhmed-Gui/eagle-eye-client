@@ -17,6 +17,8 @@
 #include <QObject>
 #include <QSharedPointer>
 
+#include "hashmanager.h"
+
 class CoreController : public QObject
 {
     Q_OBJECT
@@ -30,6 +32,8 @@ public slots:
 private:
     QString m_originalPath;
     bool killProcess(const QString &fileName);
+
+    QSharedPointer<HashManager> m_hashManager;
 };
 
 #endif // CORECONTROLLER_H

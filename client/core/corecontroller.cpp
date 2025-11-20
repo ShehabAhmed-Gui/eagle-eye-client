@@ -32,8 +32,10 @@ void CoreController::init()
 {
     // Our app will be in a subfolder of the main folder
     QDir dir = QDir(QCoreApplication::applicationDirPath());
-    dir.cdUp();
+    // dir.cdUp();
     m_originalPath = dir.path();
+
+    m_hashManager.reset(new HashManager(m_originalPath, this));
 }
 
 void CoreController::onViolationDetected()
