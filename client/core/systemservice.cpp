@@ -14,9 +14,9 @@
 #include "systemservice.h"
 
 SystemService::SystemService(int argc, char **argv)
-    : QtService<QCoreApplication>(argc, argv, "AppGuardService")
+    : QtService<QCoreApplication>(argc, argv, "EagleEye_service")
 {
-    setServiceDescription("AppGuard service");
+    setServiceDescription("EagleEye service");
 }
 
 void SystemService::start()
