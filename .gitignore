@@ -1,0 +1,12 @@
+CMakeLists.txt.user*
+CMakeUserPresets.json
+CMakePresets.json
+CMakeSettings.json
+.DS_Store
+
+build/*
+build_test/*
+.vscode/*
+.vs/*
+out/*
+/test_chamber/.vs
