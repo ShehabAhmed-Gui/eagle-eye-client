@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-set(PROJECT Morched)
+set(PROJECT EagleEye)
 
 project(${PROJECT} VERSION 1.0 LANGUAGES CXX)
 
@@ -15,11 +15,14 @@ set(SOURCES
     client/core/main.cpp
     client/core/corecontroller.cpp
     client/core/systemservice.cpp
+    client/core/logger.cpp
 )
 
 set(HEADERS
+    client/core/defs.h
     client/core/corecontroller.h
     client/core/systemservice.h
+    client/core/logger.h
 )
 
 include(client/core/service_src/qtservice.cmake)
@@ -27,7 +30,6 @@ include(client/core/service_src/qtservice.cmake)
 qt_add_executable(${PROJECT}
     ${SOURCES}
     ${HEADERS}
-    client/core/defs.h
 )
 
 target_link_libraries(${PROJECT} PRIVATE
