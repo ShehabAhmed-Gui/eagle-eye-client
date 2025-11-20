@@ -16,6 +16,7 @@ set(SOURCES
     client/core/corecontroller.cpp
     client/core/systemservice.cpp
     client/core/logger.cpp
+    client/core/hash.cpp
 )
 
 set(HEADERS
@@ -23,6 +24,7 @@ set(HEADERS
     client/core/corecontroller.h
     client/core/systemservice.h
     client/core/logger.h
+    client/core/hash.h
 )
 
 include(client/core/service_src/qtservice.cmake)
