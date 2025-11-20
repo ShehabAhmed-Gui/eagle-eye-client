@@ -11,7 +11,6 @@
  * limitations under the License.
  */
 
-
 #include "logger.h"
 #include <iostream>
 #include <QRegularExpression>

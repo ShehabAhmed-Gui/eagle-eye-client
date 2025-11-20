@@ -15,6 +15,8 @@
 #include <QObject>
 #include <QScopedPointer>
 
+#include <QTimer>
+
 #include "corecontroller.h"
 #include "systemservice.h"
 #include "logger.h"
