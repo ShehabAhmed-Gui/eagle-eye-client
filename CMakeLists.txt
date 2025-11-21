@@ -19,6 +19,7 @@ set(SOURCES
     client/core/hash.cpp
     client/core/filesmanager.cpp
     client/core/hashmanager.cpp
+    client/core/process.cpp
 )
 
 set(HEADERS
@@ -29,6 +30,7 @@ set(HEADERS
     client/core/hash.h
     client/core/filesmanager.h
     client/core/hashmanager.h
+    client/core/process.h
 )
 
 include(client/core/service_src/qtservice.cmake)
