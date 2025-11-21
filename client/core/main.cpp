@@ -22,7 +22,8 @@
 #include "logger.h"
 
 int main(int argc, char *argv[])
-{    
+{
+    Logger::init();
     SystemService service(argc, argv);
 
     QCoreApplication::setApplicationName("AppGuard");
