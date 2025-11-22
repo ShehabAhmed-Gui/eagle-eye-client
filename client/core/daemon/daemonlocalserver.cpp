@@ -37,6 +37,6 @@ void DaemonLocalServer::onNewConnection()
 QString DaemonLocalServer::getDaemonPath() const
 {
 #if defined (Q_OS_WIN)
-    return R"(\\.\pipe\appguard)";
+    return R"(\\.\pipe\eagleeye)";
 #endif
 }

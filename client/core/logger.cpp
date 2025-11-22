@@ -64,7 +64,7 @@ QString Logger::systemLogsDir()
 
     for (QString &location : locationList) {
         if (location.contains(primaryLocation)) {
-            QString systemLocation = QString("%1/%2/log").arg(location, "AppGuard");
+            QString systemLocation = QString("%1/%2/log").arg(location, "EagleEye");
             return systemLocation;
         }
     }
@@ -80,7 +80,7 @@ void Logger::init()
         return;
     }
 
-    const QString serviceLogsName = "AppGuard.log";
+    const QString serviceLogsName = "EagleEye.log";
     m_logFile.setFileName(logsDir.filePath(serviceLogsName));
 
     if (!m_logFile.open(QIODevice::Append)) {

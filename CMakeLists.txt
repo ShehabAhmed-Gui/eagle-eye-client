@@ -19,14 +19,11 @@ set(SOURCES
     client/core/hash.cpp
     client/core/filesmanager.cpp
     client/core/hashmanager.cpp
-<<<<<<< HEAD
     client/core/daemon/daemonlocalserver.cpp
     client/core/daemon/daemonconnection.cpp
     client/core/securitymonitor.cpp
     client/core/keychainmanager.cpp
-=======
     client/core/process.cpp
->>>>>>> 99399d822c9ad9687120e2a27b51d74cca4854be
 )
 
 set(HEADERS
@@ -37,14 +34,11 @@ set(HEADERS
     client/core/hash.h
     client/core/filesmanager.h
     client/core/hashmanager.h
-<<<<<<< HEAD
     client/core/daemon/daemonlocalserver.h
     client/core/daemon/daemonconnection.h
     client/core/securitymonitor.h
     client/core/keychainmanager.h
-=======
     client/core/process.h
->>>>>>> 99399d822c9ad9687120e2a27b51d74cca4854be
 )
 
 include(3rdparty/service_src/qtservice.cmake)
