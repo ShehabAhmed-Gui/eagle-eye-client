@@ -53,6 +53,8 @@ include_directories(
 set(BUILD_WITH_QT6 ON)
 add_subdirectory(3rdparty/qkeychain/)
 
+add_subdirectory(test_chamber)
+
 qt_add_executable(${PROJECT}
     ${SOURCES}
     ${HEADERS}
