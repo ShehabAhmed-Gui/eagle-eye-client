@@ -310,7 +310,7 @@ void sha256_update(sha256_state* state, const char* block, int block_len)
 
 void sha256_finalize(sha256_state* state)
 {
-    if (state->buffer_len == 0) return;
+//    if (state->buffer_len == 0) return;
     
     std::vector<char> padded_chunk = pad_message(state->buffer.data(), state->buffer_len,
                                                  state->message_len);
