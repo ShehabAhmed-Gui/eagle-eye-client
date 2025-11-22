@@ -10,3 +10,4 @@ build_test/*
 .vs/*
 out/*
 /test_chamber/.vs
+/client/core/.vscode

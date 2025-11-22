@@ -43,15 +43,29 @@ struct sha256_state
                           //in chunks. message_len = 5000 * 1000
 };
 
+struct hmac_sha256_state
+{
+    static const int block_size = 64;
+    std::array<uint32_t, 8> hash;
+    sha256_state inner_hash;
+    std::array<char, hmac_sha256_state::block_size> opad;
+};
+
+//Used when the entire message to be hashed will be passed in at once
+std::array<uint32_t, 8> sha256(const char* input, int input_len);
+
+std::array<uint32_t, 8> hmac_sha256(const char* msg, int msg_len);
+
 
 //Used when the message will be hashed in chunks, for example when loading files.
 void sha256_init(sha256_state* state, uint64_t message_len);
 void sha256_update(sha256_state* state, const char* block, int block_len);
 void sha256_finalize(sha256_state* state);
 
+void hmac_sha256_init(hmac_sha256_state* state, uint64_t message_len);
+void hmac_sha256_update(hmac_sha256_state* state, const char* block, int block_len);
+void hmac_sha256_finalize(hmac_sha256_state* state);
 
-//Used when the entire message to be hashed will be passed in at once
-std::array<uint32_t, 8> sha256(const char* input, int input_len);
 
 //Prints out the 8 word SHA256 hash in hexadecimal.
 void print_hash(const std::array<uint32_t, 8>& hash);
