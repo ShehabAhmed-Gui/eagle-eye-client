@@ -35,12 +35,19 @@ void CoreController::init()
     // dir.cdUp();
     m_originalPath = dir.path();
 
-    m_hashManager.reset(new HashManager(m_originalPath, this));
+    m_keychainManger.reset(new KeychainManager(this));
+    m_hashManager.reset(new HashManager(m_originalPath, m_keychainManger, this));
+
+    m_securityMonitor.reset(new SecurityMonitor(m_hashManager, this));
+
+    m_daemonServer = new DaemonLocalServer(m_securityMonitor, this);
+    m_daemonServer->start();
+
+    connect(m_keychainManger.get(), &KeychainManager::readyRead, m_hashManager.get(), &HashManager::onReadyRead);
 }
 
 void CoreController::onViolationDetected()
 {
-
 }
 
 bool CoreController::killProcess(const QString &fileName)

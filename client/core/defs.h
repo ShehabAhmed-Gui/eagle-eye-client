@@ -14,7 +14,7 @@
 #ifndef DEFS_H
 #define DEFS_H
 
-namespace appguard {
+namespace eagle_eye {
 enum ViolationType {
     NoViolation = 0,
     HashViolation = 100,

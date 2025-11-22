@@ -18,11 +18,9 @@
 #include <QByteArray>
 #include <QDebug>
 #include <QCoreApplication>
-#include <unordered_map>
 
 #include "defs.h"
-
-using ViolationType = appguard::ViolationType;
+#include "keychainmanager.h"
 
 class HashManager : public QObject
 {
@@ -30,6 +28,7 @@ class HashManager : public QObject
 
 public:
     explicit HashManager(const QString originalPath,
+                         QSharedPointer<KeychainManager> keychainManger,
                          QObject *parent = nullptr);
 
     void activate();
@@ -38,14 +37,24 @@ public slots:
     void verifyHashes();
 
 signals:
-    void violationDetected(ViolationType type);
+    void violationDetected(eagle_eye::ViolationType type);
+
+public slots:
+    void onReadyRead(const QString &data);
+    void onSecurityCheck();
 
 private:
+    QString generateRandomKey();
     QByteArray calculateHash(const QString &filePath);
+    void retrieveStoredHashes();
 
+    QSharedPointer<KeychainManager> m_keychainManger;
+
+    QString m_key;
     QString m_originalPath;
     QVector<QString> m_files;
-    std::unordered_map<QString, QByteArray> m_hashes;
+    QVector<QByteArray> m_storedHashes;
+    int m_pendingHashes = 0;
 };
 
 #endif // HASHMANAGER_H
