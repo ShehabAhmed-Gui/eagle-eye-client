@@ -24,6 +24,7 @@ set(SOURCES
     client/core/securitymonitor.cpp
     client/core/keychainmanager.cpp
     client/core/process.cpp
+    client/core/processmonitor.cpp
 )
 
 set(HEADERS
@@ -39,6 +40,7 @@ set(HEADERS
     client/core/securitymonitor.h
     client/core/keychainmanager.h
     client/core/process.h
+    client/core/processmonitor.h
 )
 
 include(3rdparty/service_src/qtservice.cmake)
