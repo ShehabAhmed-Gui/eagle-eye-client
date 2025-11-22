@@ -11,7 +11,6 @@
  * limitations under the License.
  */
 
-//TODO(omar): handle empty input edge case for hmac
 
 #include <cstdlib>
 #include <cstdint>
@@ -297,7 +296,6 @@ void sha256_update(sha256_state* state, const char* block, int block_len)
         {
             state->hash[i] += hash[i];
         }*/
-
         block_len -= 64;
         block += 64; 
     }
