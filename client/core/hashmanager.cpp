@@ -71,8 +71,8 @@ QByteArray HashManager::calculateHash(const QString &filePath)
     }
     qint64 fileSize = file.size();
     
-    sha256_state sha;
-    sha256_init(&sha, fileSize);
+    hmac_sha256_state sha;
+    hmac_sha256_init(&sha, fileSize);
 
     QDataStream dataStream(&file);
     std::array<char, FILE_CHUNK_SIZE> chunk;
@@ -81,10 +81,10 @@ QByteArray HashManager::calculateHash(const QString &filePath)
     while (dataStream.atEnd() == false)
     {
         chunk_len = dataStream.readRawData(chunk.data(), FILE_CHUNK_SIZE);
-        sha256_update(&sha, chunk.data(), chunk_len);
+        hmac_sha256_update(&sha, chunk.data(), chunk_len);
     }
 
-    sha256_finalize(&sha);
+    hmac_sha256_finalize(&sha);
 
     return QByteArray(reinterpret_cast<const char*>(sha.hash.data()), sha.hash.size() * sizeof(uint32_t));
 }
