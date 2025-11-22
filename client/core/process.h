@@ -22,20 +22,18 @@
 
 namespace Process
 {
-    /*
-    * ProcessHandle's id is by default set to whatever the invalid value is
-    * for the platform. for example win32 is INVALID_HANDLE_VALUE
-    * linux is -1 (pid_t)
-    * this signals that the process handle is empty/no process has been specified
-    */
+    // ProcessHandle's id is by default set to whatever the invalid value is
+    // for the platform. for example win32 is INVALID_HANDLE_VALUE
+    // linux is -1 (pid_t)
+    // this signals that the process handle is empty/no process has been specified
     struct ProcessHandle
     {
-        #if defined(_WIN32)
+#if defined(_WIN32)
         HANDLE id = INVALID_HANDLE_VALUE;
-        #endif
+#endif
 
-        //Checks if the process id/handle is invalid
-        //based on the OS
+        // Checks if the process id/handle is invalid
+        // based on the OS
         bool isEmpty();
     };
 

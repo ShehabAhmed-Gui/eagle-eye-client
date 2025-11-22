@@ -1,6 +1,12 @@
 #include "securitymonitor.h"
+#include "processmonitor.h"
+#include "logger.h"
 
 #define VERIFY_TIME_MSEC 10000
+
+namespace {
+Logger logger("SecurityMonitor");
+}
 
 SecurityMonitor::SecurityMonitor(QSharedPointer<HashManager> hashManager,
                                  QObject *parent)
@@ -37,6 +43,13 @@ QJsonObject SecurityMonitor::token()
 
 void SecurityMonitor::integrityCheck()
 {
+    eagle_eye::ViolationType result = ProcessMonitor::run();
+    if (result != ViolationType::NoViolation) {
+        logger.critical() << "Debugger violation detected";
+        onViolationDetected(result);
+        return;
+    }
+
     m_hashManager->onSecurityCheck();
 }
 

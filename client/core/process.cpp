@@ -33,23 +33,25 @@ namespace Process
 
     bool hasDebugger(ProcessHandle process)
     {
-        #if defined(_WIN32)
+#if defined(_WIN32)
 
         BOOL result = FALSE;
         BOOL success;
-        if (process.isEmpty()) //check the current process
+
+        // Check the current process
+        if (process.isEmpty())
         {
-            //First check if the process is running in the context of a
-            //user mode debugger
-            //Unlike CheckRemoteDebuggerPresent which checks for a debugger
-            //as a seperate (parallel) process.
-            //TODO(): this check might be redundant
+            // First check if the process is running in the context of a
+            // user mode debugger
+            // Unlike CheckRemoteDebuggerPresent which checks for a debugger
+            // as a seperate (parallel) process.
+            // TODO(): this check might be redundant
             if (IsDebuggerPresent())
             {
                 return true;
             }
 
-            //Get the current process if no process was specified
+            // Get the current process if no process was specified
             success = CheckRemoteDebuggerPresent(GetCurrentProcess(), &result);
         }
         else
@@ -59,24 +61,24 @@ namespace Process
            
         return success && result;
 
-        #endif
+#endif
 
         return false;
     }
 
     void closeProcess(ProcessHandle process)
     {
-        #if defined(_WIN32)
+#if defined(_WIN32)
 
         TerminateProcess(process.id, 0);
 
-        #endif
+#endif
     }
 
     ProcessHandle runProcess(std::wstring exePath)
     {
         ProcessHandle process = {};
-        #if defined(_WIN32)
+#if defined(_WIN32)
 
         HINSTANCE returnCode = ShellExecute(nullptr, nullptr,
                      exePath.data(),
@@ -84,9 +86,9 @@ namespace Process
                      nullptr,
                      SW_NORMAL);
 
-        //TODO(omar): check return code
+        // TODO(omar): check return code
 
-        //Get process id of the process we just ran
+        // Get process id of the process we just ran
         HANDLE processSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         PROCESSENTRY32 processEntry;
         processEntry.dwSize = sizeof(PROCESSENTRY32);
@@ -105,7 +107,7 @@ namespace Process
            }
         }
 
-        #endif
+#endif
 
         return process;
     }
@@ -113,14 +115,14 @@ namespace Process
 
     std::wstring getProcessPath(ProcessHandle process)
     {
-        #if defined(_WIN32)
+#if defined(_WIN32)
         wchar_t processPath[MAX_PATH];
         DWORD processPathSize = MAX_PATH;
         QueryFullProcessImageName(process.id, 0, processPath, &processPathSize);
 
         return std::wstring(processPath);
 
-        #endif
+#endif
 
         return L"";
     }
