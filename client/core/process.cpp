@@ -16,6 +16,8 @@
 #if defined(_WIN32)
 #include <windows.h>
 #include <tlhelp32.h>
+#include <tchar.h>
+#include <psapi.h>
 #endif
 
 namespace Process
@@ -125,5 +127,62 @@ namespace Process
         return L"";
     }
 
+    std::vector<std::wstring> getProcessModules(ProcessHandle& process)
+    {
+#if defined(_WIN32)
 
+        HMODULE modules[1024];
+        DWORD bytesNeeded;
+        if (EnumProcessModules(process.id, modules, sizeof(modules), &bytesNeeded) == 0) {
+            //TODO(omar): Log
+        }
+
+        int moduleCount = bytesNeeded / sizeof(HMODULE);
+        std::vector<std::wstring> modulePaths(moduleCount);
+
+        for (int i = 0; i < moduleCount; i++)
+        {
+            TCHAR moduleName[MAX_PATH];
+
+            // Get the full path to the module's file.
+            if (GetModuleFileNameEx(process.id, modules[i], moduleName,
+                                    sizeof(moduleName) / sizeof(TCHAR))) {
+                modulePaths[i] = moduleName;
+            }
+        }
+
+        return modulePaths;
+#endif
+
+        return {};
+    }
+
+    std::vector<uint64_t> getProcessThreads(ProcessHandle& process)
+    {
+#if defined(_WIN32)
+        HANDLE threadSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD, 0);
+        THREADENTRY32 threadEntry;
+        threadEntry.dwSize = sizeof(THREADENTRY32);
+
+        if (Thread32First(threadSnapshot, &threadEntry) == FALSE) {
+            //TODO(omar): Log
+            CloseHandle(threadSnapshot);
+            return {};
+        }
+
+        std::vector<uint64_t> threadIds;
+        do
+        {
+            if (threadEntry.th32OwnerProcessID == GetProcessId(process.id)) {
+                threadIds.push_back(threadEntry.th32ThreadID);
+            }
+        } while (Thread32Next(threadSnapshot, &threadEntry));
+
+        CloseHandle(threadSnapshot);
+
+        return threadIds;
+#endif
+
+        return {};
+    }
 }
