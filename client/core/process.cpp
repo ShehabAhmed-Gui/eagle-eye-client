@@ -31,7 +31,7 @@ namespace Process
         return false;
     }
 
-    bool hasDebugger(ProcessHandle process)
+    bool hasDebugger(ProcessHandle& process)
     {
 #if defined(_WIN32)
 
@@ -65,7 +65,7 @@ namespace Process
         return false;
     }
 
-    void closeProcess(ProcessHandle process)
+    void closeProcess(ProcessHandle& process)
     {
 #if defined(_WIN32)
 
@@ -74,7 +74,7 @@ namespace Process
 #endif
     }
 
-    //TODO(omar): use a call other than ShellExecute, so that this works in the service
+    //TODO(omar): (WIN32) use a call other than ShellExecute, so that this works in the service
     ProcessHandle runProcess(std::wstring exePath)
     {
         ProcessHandle process = {};
@@ -111,7 +111,7 @@ namespace Process
     }
 
 
-    std::wstring getProcessPath(ProcessHandle process)
+    std::wstring getProcessPath(ProcessHandle& process)
     {
 #if defined(_WIN32)
         wchar_t processPath[MAX_PATH];

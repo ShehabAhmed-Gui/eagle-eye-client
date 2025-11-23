@@ -37,15 +37,15 @@ namespace Process
         bool isEmpty();
     };
 
-    void closeProcess(ProcessHandle process);
+    void closeProcess(ProcessHandle& process);
 
     // Runs the specified executable, returns the handle to its process
     ProcessHandle runProcess(std::wstring exePath);
 
     // Returns the absolute path of the process executable
-    std::wstring getProcessPath(ProcessHandle process);
+    std::wstring getProcessPath(ProcessHandle& process);
 
-    bool hasDebugger(ProcessHandle process);
+    bool hasDebugger(ProcessHandle& process);
 }
 
 #endif
