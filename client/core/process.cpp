@@ -22,11 +22,11 @@ namespace Process
 {
     bool ProcessHandle::isEmpty()
     {
-        #if defined(_WIN32)
+#if defined(_WIN32)
 
         return id == INVALID_HANDLE_VALUE;
 
-        #endif
+#endif
 
         return false;
     }
@@ -38,9 +38,9 @@ namespace Process
         BOOL result = FALSE;
         BOOL success;
 
-        // Check the current process
-        if (process.isEmpty())
-        {
+        if (process.isEmpty()) {
+            // Check the current process
+
             // First check if the process is running in the context of a
             // user mode debugger
             // Unlike CheckRemoteDebuggerPresent which checks for a debugger
@@ -54,8 +54,7 @@ namespace Process
             // Get the current process if no process was specified
             success = CheckRemoteDebuggerPresent(GetCurrentProcess(), &result);
         }
-        else
-        {
+        else { 
             success = CheckRemoteDebuggerPresent(process.id, &result);
         }
            
@@ -75,6 +74,7 @@ namespace Process
 #endif
     }
 
+    //TODO(omar): use a call other than ShellExecute, so that this works in the service
     ProcessHandle runProcess(std::wstring exePath)
     {
         ProcessHandle process = {};
@@ -93,13 +93,11 @@ namespace Process
         PROCESSENTRY32 processEntry;
         processEntry.dwSize = sizeof(PROCESSENTRY32);
 
-        if (Process32First(processSnapshot, &processEntry) == TRUE)
-        {
+        if (Process32First(processSnapshot, &processEntry) == TRUE) { 
            while (Process32Next(processSnapshot, &processEntry) == TRUE)
            {
                std::wstring processExeFile = processEntry.szExeFile;
-               if (processExeFile == exePath)
-               {
+               if (processExeFile == exePath) {
                    process.id = OpenProcess(PROCESS_ALL_ACCESS,
                                                  FALSE,
                                                  processEntry.th32ProcessID);
@@ -126,4 +124,6 @@ namespace Process
 
         return L"";
     }
+
+
 }
