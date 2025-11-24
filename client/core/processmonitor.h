@@ -4,6 +4,9 @@
 #include <QString>
 #include <QCoreApplication>
 
+#include <string>
+#include <vector>
+
 #include "defs.h"
 #include "process.h"
 
@@ -19,6 +22,7 @@ public:
 
 private:
     Process::ProcessHandle process;
+    std::vector<std::wstring> processModules;
 };
 
 #endif // PROCESSMONITOR_H

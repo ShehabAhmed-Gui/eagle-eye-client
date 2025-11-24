@@ -16,6 +16,7 @@ ProcessMonitor::ProcessMonitor()
     }
     else {
         logger.info() << "Test chamber process found";
+        processModules = Process::getProcessModules(process);
     }
 }
 
