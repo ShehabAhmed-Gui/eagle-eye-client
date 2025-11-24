@@ -1,5 +1,4 @@
 #include "securitymonitor.h"
-#include "processmonitor.h"
 #include "logger.h"
 
 #define VERIFY_TIME_MSEC 2000
@@ -17,10 +16,15 @@ SecurityMonitor::SecurityMonitor(QSharedPointer<HashManager> hashManager,
 
     m_timer = new QTimer(this);
     connect(m_timer, &QTimer::timeout, this, &SecurityMonitor::integrityCheck);
+    logger.debug() << "Security monitor init";
 
     QJsonObject obj;
     obj.insert("allowed", true);
     setToken(obj);
+
+    m_processMonitor.reset(new ProcessMonitor());
+
+    activate();
 }
 
 void SecurityMonitor::activate()
@@ -43,11 +47,14 @@ QJsonObject SecurityMonitor::token()
 
 void SecurityMonitor::integrityCheck()
 {
-    eagle_eye::ViolationType result = ProcessMonitor::run();
+    eagle_eye::ViolationType result = m_processMonitor->run();
     if (result != ViolationType::NoViolation) {
         logger.critical() << "Violation detected";
         onViolationDetected(result);
         return;
+    }
+    else {
+        logger.debug() << "No violation detected";
     }
 
     m_hashManager->onSecurityCheck();
