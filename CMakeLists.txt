@@ -49,6 +49,9 @@ include_directories(
     3rdparty/qkeychain/qtkeychain
 )
 
+# This is necessary, otherwise
+# we get a runtime missing dll error.
+set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
 # Force qkeychain to use Qt6
 set(BUILD_WITH_QT6 ON)
 add_subdirectory(3rdparty/qkeychain/)
@@ -56,6 +59,7 @@ add_subdirectory(3rdparty/qkeychain/)
 qt_add_executable(${PROJECT}
     ${SOURCES}
     ${HEADERS}
+    client/core/utils.h client/core/utils.cpp
 )
 
 target_link_libraries(${PROJECT} PRIVATE

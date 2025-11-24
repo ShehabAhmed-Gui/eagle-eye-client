@@ -44,7 +44,6 @@ public slots:
     void onSecurityCheck();
 
 private:
-    QString generateRandomKey();
     QByteArray calculateHash(const QString &filePath);
     void retrieveStoredHashes();
 

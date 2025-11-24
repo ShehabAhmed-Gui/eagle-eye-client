@@ -11,7 +11,6 @@
  * limitations under the License.
  */
 
-
 #include <cstdlib>
 #include <cstdint>
 
@@ -22,6 +21,7 @@
 #include <iomanip>
 
 #include "hash.h"
+#include "utils.h"
 
 
 //Checks if the architecture is little endian in runtime
@@ -91,11 +91,10 @@ static const std::array<uint32_t, 64> k =
 
 void hmac_sha256_init(hmac_sha256_state* state, uint64_t message_len)
 {
-    //msg length + the length of the ipad we will feed first
+    // msg length + the length of the ipad we will feed first
     sha256_init(&(state->inner_hash), message_len + state->block_size);
 
-    //TODO(): decide on the key to use
-    const std::string key = "4q72JHgX89z3BkFMt6cwQxL1rD28jpN5UfVhIZYPbCSeuGovRaWmA0sD9ECtX7Jf";
+    const std::string key = Utils::getSecureKey().toStdString();
 
     std::array<char, state->block_size> block_sized_key;
     std::array<char, state->block_size> ipad;

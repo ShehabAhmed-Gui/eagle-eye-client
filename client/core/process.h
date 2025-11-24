@@ -14,8 +14,11 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+#include <QString>
+
 #ifdef _WIN32
 #include <windows.h>
+#include <tlhelp32.h>
 #endif
 
 #include <string>
@@ -46,6 +49,8 @@ namespace Process
     std::wstring getProcessPath(ProcessHandle process);
 
     bool hasDebugger(ProcessHandle process);
+
+    ProcessHandle getHandleToProcess(const QString &exePath);
 }
 
 #endif

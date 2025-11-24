@@ -19,6 +19,8 @@
 #include <Tlhelp32.h>
 #include <winbase.h>
 
+#include "utils.h"
+
 namespace {
 Logger logger("CoreController");
 }
@@ -31,7 +33,7 @@ CoreController::CoreController(QObject *parent)
 void CoreController::init()
 {
     // Our app will be in a subfolder of the main folder
-    QDir dir = QDir(QCoreApplication::applicationDirPath());
+    QDir dir = QDir(Utils::getAppPath());
     // dir.cdUp();
     m_originalPath = dir.path();
 

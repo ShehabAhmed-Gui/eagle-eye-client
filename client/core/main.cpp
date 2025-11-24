@@ -26,7 +26,7 @@ int main(int argc, char *argv[])
     Logger::init();
     SystemService service(argc, argv);
 
-    QCoreApplication::setApplicationName("AppGuard");
+    QCoreApplication::setApplicationName("EagleEye");
     QCoreApplication::setApplicationVersion("1.0");
 
     QScopedPointer<CoreController> coreController;

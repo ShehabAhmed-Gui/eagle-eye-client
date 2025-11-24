@@ -15,6 +15,7 @@
 #include "hash.h"
 #include "filesmanager.h"
 #include "logger.h"
+#include "utils.h"
 
 namespace {
 Logger logger("HashManager");
@@ -27,7 +28,7 @@ HashManager::HashManager(const QString originalPath,
     , m_originalPath(originalPath)
     , m_keychainManger(keychainManger)
 {
-    m_key = generateRandomKey();
+    m_key = Utils::getSecureKey();
 }
 
 void HashManager::activate()
@@ -86,7 +87,7 @@ QByteArray HashManager::calculateHash(const QString &filePath)
 
     sha256_finalize(&sha);
 
-    return QByteArray(reinterpret_cast<const char*>(sha.hash.data()), sha.hash.size() * sizeof(uint32_t));
+    return QByteArray(/*reinterpret_cast<const char*>(sha.hash.data()), sha.hash.size() * sizeof(uint32_t)*/);
 }
 
 void HashManager::retrieveStoredHashes()
@@ -125,10 +126,4 @@ void HashManager::onReadyRead(const QString &data)
 void HashManager::onSecurityCheck()
 {
     retrieveStoredHashes();
-}
-
-QString HashManager::generateRandomKey()
-{
-    // TOOD: generate a random key
-    return QString();
 }

@@ -12,21 +12,19 @@
  */
 
 #include "process.h"
+#include "logger.h"
 
-#if defined(_WIN32)
-#include <windows.h>
-#include <tlhelp32.h>
-#endif
+namespace {
+Logger logger("Process");
+}
 
 namespace Process
 {
     bool ProcessHandle::isEmpty()
     {
-        #if defined(_WIN32)
-
+#if defined(_WIN32)
         return id == INVALID_HANDLE_VALUE;
-
-        #endif
+#endif
 
         return false;
     }
@@ -34,44 +32,30 @@ namespace Process
     bool hasDebugger(ProcessHandle process)
     {
 #if defined(_WIN32)
-
         BOOL result = FALSE;
         BOOL success;
 
-        // Check the current process
-        if (process.isEmpty())
-        {
-            // First check if the process is running in the context of a
-            // user mode debugger
-            // Unlike CheckRemoteDebuggerPresent which checks for a debugger
-            // as a seperate (parallel) process.
-            // TODO(): this check might be redundant
-            if (IsDebuggerPresent())
-            {
-                return true;
-            }
-
-            // Get the current process if no process was specified
-            success = CheckRemoteDebuggerPresent(GetCurrentProcess(), &result);
+        if (IsDebuggerPresent()) {
+            return true;
         }
-        else
-        {
+
+        if (!process.isEmpty()) {
+            // Checks if the process running in a debugger
             success = CheckRemoteDebuggerPresent(process.id, &result);
+        } else {
+            logger.critical() << "Invalid process";
+            return true;
         }
            
         return success && result;
-
 #endif
-
         return false;
     }
 
     void closeProcess(ProcessHandle process)
     {
 #if defined(_WIN32)
-
         TerminateProcess(process.id, 0);
-
 #endif
     }
 
@@ -79,14 +63,17 @@ namespace Process
     {
         ProcessHandle process = {};
 #if defined(_WIN32)
-
-        HINSTANCE returnCode = ShellExecute(nullptr, nullptr,
+        HINSTANCE success = ShellExecute(nullptr, nullptr,
                      exePath.data(),
                      nullptr,
                      nullptr,
                      SW_NORMAL);
 
-        // TODO(omar): check return code
+        INT_PTR returnCode = (INT_PTR)success;
+        if (returnCode <= 32) {
+            logger.error() << "ShellExecute failed. Code:" << returnCode;
+            return process;
+        }
 
         // Get process id of the process we just ran
         HANDLE processSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
@@ -106,12 +93,9 @@ namespace Process
                }
            }
         }
-
 #endif
-
         return process;
     }
-
 
     std::wstring getProcessPath(ProcessHandle process)
     {
@@ -121,9 +105,30 @@ namespace Process
         QueryFullProcessImageName(process.id, 0, processPath, &processPathSize);
 
         return std::wstring(processPath);
-
 #endif
-
         return L"";
+    }
+
+    ProcessHandle getHandleToProcess(const QString &exePath)
+    {
+        ProcessHandle process = {};
+        PROCESSENTRY32 entry;
+        entry.dwSize = sizeof(PROCESSENTRY32);
+        HANDLE processSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        if (processSnapshot == INVALID_HANDLE_VALUE) {
+            logger.critical() << "Could not take a snapshot";
+            return process;
+        }
+
+        if (Process32First(processSnapshot, &entry)) {
+            do {
+                if (QString::fromWCharArray(entry.szExeFile) == exePath) {
+                    process.id = OpenProcess(PROCESS_ALL_ACCESS, FALSE, entry.th32ProcessID);
+                    break;
+                }
+            } while (Process32Next(processSnapshot, &entry));
+        }
+
+        return process;
     }
 }
