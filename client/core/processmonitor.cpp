@@ -31,6 +31,12 @@ ViolationType ProcessMonitor::run()
         return ViolationType::DebuggerViolation;
     }
 
+    std::vector<std::wstring> currentModules = Process::getProcessModules(process);
+    if (currentModules != processModules)
+    {
+        return ViolationType::DLLInjectionViolation;
+    }
+
     return ViolationType::NoViolation;
 }
 
