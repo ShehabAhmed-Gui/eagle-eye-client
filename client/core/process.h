@@ -22,6 +22,7 @@
 #endif
 
 #include <string>
+#include <vector>
 
 namespace Process
 {
@@ -40,17 +41,32 @@ namespace Process
         bool isEmpty();
     };
 
-    void closeProcess(ProcessHandle process);
+    void closeProcess(ProcessHandle& process);
 
-    // Runs the specified executable, returns the handle to its process
+    // Runs the specified executable (absolute path), returns the handle to its process
     ProcessHandle runProcess(std::wstring exePath);
 
-    // Returns the absolute path of the process executable
-    std::wstring getProcessPath(ProcessHandle process);
+    // Gets a current running process by its executable path (absolute path)
+    ProcessHandle getProcess(std::wstring exePath);
 
     bool hasDebugger(ProcessHandle process);
 
     ProcessHandle getHandleToProcess(const QString &exePath);
+
+    // Gets a current running process by its executable name
+    ProcessHandle getProcessByExeName(std::wstring exePath);
+
+    // Returns the absolute path of the process executable
+    std::wstring getProcessPath(ProcessHandle& process);
+
+    // Get paths of all the modules attached to the process.
+    // on windows, this includes the main EXE and all loaded DLLs,
+    std::vector<std::wstring> getProcessModules(ProcessHandle& process);
+
+    // Get ids of all threads owned by the process
+    std::vector<uint64_t> getProcessThreads(ProcessHandle& process);
+
+    bool hasDebugger(ProcessHandle& process);
 }
 
 #endif

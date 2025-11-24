@@ -20,6 +20,7 @@
 #include <QJsonObject>
 
 #include "hashmanager.h"
+#include "processmonitor.h"
 #include "defs.h"
 
 class SecurityMonitor : public QObject
@@ -44,6 +45,7 @@ public slots:
 private:
     QJsonObject m_token;
     QSharedPointer<HashManager> m_hashManager;
+    QSharedPointer<ProcessMonitor> m_processMonitor;
     QTimer *m_timer;
 };
 

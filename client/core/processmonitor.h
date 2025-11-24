@@ -17,8 +17,11 @@
 #include <QString>
 #include <QCoreApplication>
 
-#include <Windows.h>
+#include <string>
+#include <vector>
+
 #include "defs.h"
+#include "process.h"
 
 using ViolationType = eagle_eye::ViolationType;
 
@@ -28,7 +31,11 @@ public:
     explicit ProcessMonitor();
 
     // Returns the violation type
-    static ViolationType run();
+    ViolationType run();
+
+private:
+    Process::ProcessHandle process;
+    std::vector<std::wstring> processModules;
 };
 
 #endif // PROCESSMONITOR_H

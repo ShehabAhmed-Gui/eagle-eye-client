@@ -11,3 +11,4 @@ build_test/*
 out/*
 /test_chamber/.vs
 /client/core/.vscode
+/3rdparty/qkeychain/translations

@@ -1,4 +1,4 @@
-﻿/* Licensed under the Apache License, Version 2.0 (the "License");
+﻿﻿/* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -11,6 +11,7 @@
  * limitations under the License.
  */
 
+
 #include <cstdlib>
 #include <cstdint>
 
@@ -21,7 +22,6 @@
 #include <iomanip>
 
 #include "hash.h"
-#include "utils.h"
 
 
 //Checks if the architecture is little endian in runtime
@@ -39,7 +39,7 @@ static uint32_t maj(uint32_t x, uint32_t y, uint32_t z);
 
 //Pad to multiple of 512 bits
 // input_len : the length of the input buffer in bytes, will be used to determine padding
-// 
+//
 // msg_len : the length of the message to be put at the end of the padded buffer
 //          it is seperate from input_len for cases where pad_message()
 //          is used on the last chunk of a big multiple chunk message
@@ -55,57 +55,57 @@ static void process_schedule(const std::array<uint32_t, 64>& schedule, uint32_t*
 
 static const int CHUNK_SIZE_BITS = 512;
 static const int CHUNK_SIZE_BYTES = CHUNK_SIZE_BITS / 8;
+static const int BLOCK_SIZE = 64;
+static const std::string HMAC_KEY = "4q72JHgX89z3BkFMt6cwQxL1rD28jpN5UfVhIZYPbCSeuGovRaWmA0sD9ECtX7Jf";
 
 //initial hash values
-static const std::array<uint32_t, 8> h = 
-{
-    0x6a09e667, // H0
-    0xbb67ae85, // H1
-    0x3c6ef372, // H2
-    0xa54ff53a, // H3
-    0x510e527f, // H4
-    0x9b05688c, // H5
-    0x1f83d9ab, // H6
-    0x5be0cd19  // H7
+static const std::array<uint32_t, 8> h =
+    {
+        0x6a09e667, // H0
+        0xbb67ae85, // H1
+        0x3c6ef372, // H2
+        0xa54ff53a, // H3
+        0x510e527f, // H4
+        0x9b05688c, // H5
+        0x1f83d9ab, // H6
+        0x5be0cd19  // H7
 };
 
 static const std::array<uint32_t, 64> k =
-{
-    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
-    0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
-    0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
-    0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
-    0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
-    0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
-    0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
-    0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
-    0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
-    0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
-    0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
-    0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
-    0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
-    0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
-    0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
-    0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
+    {
+        0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
+        0x3956c25b, 0x59f111f1, 0x923f82a4, 0xab1c5ed5,
+        0xd807aa98, 0x12835b01, 0x243185be, 0x550c7dc3,
+        0x72be5d74, 0x80deb1fe, 0x9bdc06a7, 0xc19bf174,
+        0xe49b69c1, 0xefbe4786, 0x0fc19dc6, 0x240ca1cc,
+        0x2de92c6f, 0x4a7484aa, 0x5cb0a9dc, 0x76f988da,
+        0x983e5152, 0xa831c66d, 0xb00327c8, 0xbf597fc7,
+        0xc6e00bf3, 0xd5a79147, 0x06ca6351, 0x14292967,
+        0x27b70a85, 0x2e1b2138, 0x4d2c6dfc, 0x53380d13,
+        0x650a7354, 0x766a0abb, 0x81c2c92e, 0x92722c85,
+        0xa2bfe8a1, 0xa81a664b, 0xc24b8b70, 0xc76c51a3,
+        0xd192e819, 0xd6990624, 0xf40e3585, 0x106aa070,
+        0x19a4c116, 0x1e376c08, 0x2748774c, 0x34b0bcb5,
+        0x391c0cb3, 0x4ed8aa4a, 0x5b9cca4f, 0x682e6ff3,
+        0x748f82ee, 0x78a5636f, 0x84c87814, 0x8cc70208,
+        0x90befffa, 0xa4506ceb, 0xbef9a3f7, 0xc67178f2
 };
 
 void hmac_sha256_init(hmac_sha256_state* state, uint64_t message_len)
 {
-    // msg length + the length of the ipad we will feed first
-    sha256_init(&(state->inner_hash), message_len + state->block_size);
+    //msg length + the length of the ipad we will feed first
+    sha256_init(&(state->inner_hash), message_len + BLOCK_SIZE);
 
-    const std::string key = Utils::getSecureKey().toStdString();
-
-    std::array<char, state->block_size> block_sized_key;
-    std::array<char, state->block_size> ipad;
+    std::array<char, BLOCK_SIZE> block_sized_key;
+    std::array<char, BLOCK_SIZE> ipad;
 
     ipad.fill(0x36);
     state->opad.fill(0x5c);
 
-    memset(block_sized_key.data(), 0, block_sized_key.size());   
+    memset(block_sized_key.data(), 0, block_sized_key.size());
 
-    if (key.size() > state->block_size) {
-        std::array<uint32_t, 8> key_hash = sha256(key.data(), key.size());
+    if (HMAC_KEY.size() > BLOCK_SIZE) {
+        std::array<uint32_t, 8> key_hash = sha256(HMAC_KEY.data(), HMAC_KEY.size());
 
         for (int i = 0; i < key_hash.size(); i++)
         {
@@ -115,26 +115,26 @@ void hmac_sha256_init(hmac_sha256_state* state, uint64_t message_len)
         memcpy(block_sized_key.data(), key_hash.data(),
                key_hash.size() * sizeof(uint32_t));
     }
-    else if (key.size() < state->block_size) {
-        memcpy(block_sized_key.data(), key.data(),
-               key.size());
+    else if (HMAC_KEY.size() < BLOCK_SIZE) {
+        memcpy(block_sized_key.data(), HMAC_KEY.data(),
+               HMAC_KEY.size());
     }
     else {
-        memcpy(block_sized_key.data(), key.data(),
-               key.size()); 
+        memcpy(block_sized_key.data(), HMAC_KEY.data(),
+               HMAC_KEY.size());
     }
 
-    for (int i = 0; i < state->block_size; i++)
+    for (int i = 0; i < BLOCK_SIZE; i++)
     {
         state->opad[i] = block_sized_key[i] ^ state->opad[i];
     }
 
-    for (int i = 0; i < state->block_size; i++)
+    for (int i = 0; i < BLOCK_SIZE; i++)
     {
         ipad[i] = block_sized_key[i] ^ ipad[i];
     }
 
-    sha256_update(&(state->inner_hash), ipad.data(), state->block_size);
+    sha256_update(&(state->inner_hash), ipad.data(), BLOCK_SIZE);
 }
 
 
@@ -154,7 +154,7 @@ void hmac_sha256_finalize(hmac_sha256_state* state)
         inner_hash[i] = to_big_endian_u32(inner_hash[i]);
     }
 
-    std::array<char, state->block_size + (sizeof(uint32_t)*8)> outer;    
+    std::array<char, BLOCK_SIZE + (sizeof(uint32_t)*8)> outer;
 
     memcpy(outer.data(), state->opad.data(), state->opad.size());
     memcpy(outer.data() + state->opad.size(),
@@ -162,35 +162,22 @@ void hmac_sha256_finalize(hmac_sha256_state* state)
            inner_hash.size() * sizeof(uint32_t));
 
     state->hash = sha256(outer.data(), outer.size());
-
-/*    sha256_state outer;
-    size_t outer_size = state->block_size + sizeof(uint32_t)*8;
-
-    sha256_init(&outer, outer_size);
-    sha256_update(&outer, state->opad.data(), state->opad.size());
-    sha256_update(&outer, (char*)(inner_hash.data()), inner_hash.size() * sizeof(uint32_t));
-    sha256_finalize(&outer);
-
-    state->hash = outer.hash;*/
 }
 
 
 std::array<uint32_t, 8> hmac_sha256(const char* msg, int msg_len)
 {
-    std::string key = "4q72JHgX89z3BkFMt6cwQxL1rD28jpN5UfVhIZYPbCSeuGovRaWmA0sD9ECtX7Jf";
-    const int block_size = 64;
-
-    std::array<char, block_size> block_sized_key;
-    std::array<char, block_size> ipad;
-    std::array<char, block_size> opad;
+    std::array<char, BLOCK_SIZE> block_sized_key;
+    std::array<char, BLOCK_SIZE> ipad;
+    std::array<char, BLOCK_SIZE> opad;
 
     ipad.fill(0x36);
     opad.fill(0x5c);
 
-    memset(block_sized_key.data(), 0, block_sized_key.size());   
+    memset(block_sized_key.data(), 0, block_sized_key.size());
 
-    if (key.size() > block_size) {
-        std::array<uint32_t, 8> key_hash = sha256(key.data(), key.size());
+    if (HMAC_KEY.size() > BLOCK_SIZE) {
+        std::array<uint32_t, 8> key_hash = sha256(HMAC_KEY.data(), HMAC_KEY.size());
 
         for (int i = 0; i < key_hash.size(); i++)
         {
@@ -200,21 +187,21 @@ std::array<uint32_t, 8> hmac_sha256(const char* msg, int msg_len)
         memcpy(block_sized_key.data(), key_hash.data(),
                key_hash.size() * sizeof(uint32_t));
     }
-    else if (key.size() < block_size) {
-        memcpy(block_sized_key.data(), key.data(),
-               key.size());
+    else if (HMAC_KEY.size() < BLOCK_SIZE) {
+        memcpy(block_sized_key.data(), HMAC_KEY.data(),
+               HMAC_KEY.size());
     }
     else {
-        memcpy(block_sized_key.data(), key.data(),
-               key.size()); 
+        memcpy(block_sized_key.data(), HMAC_KEY.data(),
+               HMAC_KEY.size());
     }
 
-    for (int i = 0; i < block_size; i++)
+    for (int i = 0; i < BLOCK_SIZE; i++)
     {
         opad[i] = block_sized_key[i] ^ opad[i];
     }
 
-    for (int i = 0; i < block_size; i++)
+    for (int i = 0; i < BLOCK_SIZE; i++)
     {
         ipad[i] = block_sized_key[i] ^ ipad[i];
     }
@@ -245,12 +232,11 @@ std::array<uint32_t, 8> hmac_sha256(const char* msg, int msg_len)
 void sha256_init(sha256_state* state, uint64_t message_len)
 {
     state->hash = h;
-//    state->hash = {0};
     state->buffer_len = 0;
     state->message_len = message_len;
 }
 
-    
+
 void sha256_update(sha256_state* state, const char* block, int block_len)
 {
     if (state->buffer_len > 0)
@@ -264,12 +250,6 @@ void sha256_update(sha256_state* state, const char* block, int block_len)
             {
                 std::array<uint32_t, 64> schedule = prepare_schedule(state->buffer.data());
                 process_schedule(schedule, state->hash.data());
-
-/*                std::array<uint32_t, 8> hash = sha256(state->buffer.data(), state->buffer_len);
-                for (int i = 0; i < hash.size(); i++)
-                {
-                    state->hash[i] += hash[i];
-                }*/
 
                 state->buffer_len = 0;
                 block += i;
@@ -290,13 +270,8 @@ void sha256_update(sha256_state* state, const char* block, int block_len)
         std::array<uint32_t, 64> schedule = prepare_schedule(block);
         process_schedule(schedule, state->hash.data());
 
-/*        std::array<uint32_t, 8> hash = sha256(block, 64);
-        for (int i = 0; i < hash.size(); i++)
-        {
-            state->hash[i] += hash[i];
-        }*/
         block_len -= 64;
-        block += 64; 
+        block += 64;
     }
 
     if (block_len > 0)
@@ -309,8 +284,6 @@ void sha256_update(sha256_state* state, const char* block, int block_len)
 
 void sha256_finalize(sha256_state* state)
 {
-//    if (state->buffer_len == 0) return;
-    
     std::vector<char> padded_chunk = pad_message(state->buffer.data(), state->buffer_len,
                                                  state->message_len);
     int chunk_count = (padded_chunk.size() + CHUNK_SIZE_BYTES - 1) / CHUNK_SIZE_BYTES;
@@ -320,16 +293,6 @@ void sha256_finalize(sha256_state* state)
         std::array<uint32_t, 64> schedule = prepare_schedule(padded_chunk.data() + (i * CHUNK_SIZE_BYTES));
         process_schedule(schedule, state->hash.data());
     }
-
-/*    if (state->buffer_len)
-    {
-        std::array<uint32_t, 8> hash = sha256(state->buffer.data(),
-        state->buffer_len);
-        for (int i = 0; i < hash.size(); i++)
-        {
-            state->hash[i] += hash[i];
-        }
-    }*/
 }
 
 
@@ -415,7 +378,7 @@ static std::array<uint32_t, 64> prepare_schedule(const char* block)
     {
         uint32_t word1 = schedule[i-15];
         uint32_t word2 = schedule[i-2];
-        
+
         uint32_t s0 = circular_right_shift(word1, 7) ^ circular_right_shift(word1, 18) ^ (word1 >> 3);
 
         uint32_t s1 = circular_right_shift(word2, 17) ^ circular_right_shift(word2, 19) ^ (word2 >> 10);
@@ -452,7 +415,7 @@ static std::vector<char> pad_message(const char* input, int input_len, uint64_t 
     uint64_t input_len_long = to_big_endian_u64(msg_len * 8);
     memcpy(m.data() + mlen - 8, &input_len_long, 8);
 
-    return m;   
+    return m;
 }
 
 
@@ -486,7 +449,7 @@ static uint64_t to_big_endian_u64(uint64_t value)
 
 
 static bool is_little_endian()
-{ 
+{
     uint16_t x = 1;
     return *(uint8_t*)&x == 1;
 }
@@ -500,7 +463,7 @@ static uint32_t circular_right_shift(uint32_t value, int shift_by)
 
 static uint32_t ch(uint32_t x, uint32_t y, uint32_t z)
 {
-    return (x & y) ^ ((~x) & z); 
+    return (x & y) ^ ((~x) & z);
 }
 
 
