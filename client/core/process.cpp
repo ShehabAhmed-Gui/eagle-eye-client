@@ -91,6 +91,14 @@ namespace Process
         // TODO(omar): check return code
 
         // Get process id of the process we just ran
+        return getProcess(exePath);
+#endif
+
+        return process;
+    }
+
+    ProcessHandle getProcess(std::wstring exePath)
+    {
         HANDLE processSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         PROCESSENTRY32 processEntry;
         processEntry.dwSize = sizeof(PROCESSENTRY32);
@@ -98,20 +106,38 @@ namespace Process
         if (Process32First(processSnapshot, &processEntry) == TRUE) { 
            while (Process32Next(processSnapshot, &processEntry) == TRUE)
            {
-               std::wstring processExeFile = processEntry.szExeFile;
-               if (processExeFile == exePath) {
-                   process.id = OpenProcess(PROCESS_ALL_ACCESS,
+                HANDLE checkedProcessHandle = OpenProcess(PROCESS_QUERY_INFORMATION,
+                                                            FALSE,
+                                                            processEntry.th32ProcessID);
+                if (checkedProcessHandle == nullptr) {
+                    // Normal behavior, we just can't access that process
+                    continue;
+                }
+                
+                wchar_t fullPath[MAX_PATH];
+                DWORD fullPathSize = MAX_PATH;
+
+                if (QueryFullProcessImageName(checkedProcessHandle, 0, fullPath, &fullPathSize) == 0) {
+                    //TODO(omar): Log
+                    CloseHandle(checkedProcessHandle);
+                    continue;
+                }
+                std::wstring processExeFile = fullPath;
+
+                CloseHandle(checkedProcessHandle);
+
+                if (processExeFile == exePath) {
+                    ProcessHandle process;
+                    process.id = OpenProcess(PROCESS_ALL_ACCESS,
                                                  FALSE,
                                                  processEntry.th32ProcessID);
+                    return process;
                }
            }
         }
 
-#endif
-
-        return process;
+        return ProcessHandle();
     }
-
 
     std::wstring getProcessPath(ProcessHandle& process)
     {
@@ -130,6 +156,10 @@ namespace Process
     std::vector<std::wstring> getProcessModules(ProcessHandle& process)
     {
 #if defined(_WIN32)
+
+        // wait until the process is waiting for input
+        // increasing the chance that all the "startup" dlls have been injected
+        WaitForInputIdle(process.id, 2000);
 
         HMODULE modules[1024];
         DWORD bytesNeeded;

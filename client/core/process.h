@@ -40,8 +40,11 @@ namespace Process
 
     void closeProcess(ProcessHandle& process);
 
-    // Runs the specified executable, returns the handle to its process
+    // Runs the specified executable (absolute path), returns the handle to its process
     ProcessHandle runProcess(std::wstring exePath);
+
+    // Gets a current running process by its executable path (absolute path)
+    ProcessHandle getProcess(std::wstring exePath);
 
     // Returns the absolute path of the process executable
     std::wstring getProcessPath(ProcessHandle& process);
