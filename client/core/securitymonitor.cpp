@@ -45,7 +45,7 @@ void SecurityMonitor::integrityCheck()
 {
     eagle_eye::ViolationType result = ProcessMonitor::run();
     if (result != ViolationType::NoViolation) {
-        logger.critical() << "Debugger violation detected";
+        logger.critical() << "Violation detected";
         onViolationDetected(result);
         return;
     }
