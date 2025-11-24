@@ -99,6 +99,7 @@ namespace Process
 
     ProcessHandle getProcess(std::wstring exePath)
     {
+#if defined(_WIN32)
         HANDLE processSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         PROCESSENTRY32 processEntry;
         processEntry.dwSize = sizeof(PROCESSENTRY32);
@@ -135,12 +136,13 @@ namespace Process
                }
            }
         }
-
+#endif
         return ProcessHandle();
     }
 
     ProcessHandle getProcessByExeName(std::wstring exePath)
     {
+#if defined(_WIN32)
         HANDLE processSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
         PROCESSENTRY32 processEntry;
         processEntry.dwSize = sizeof(PROCESSENTRY32);
@@ -159,7 +161,7 @@ namespace Process
                }
            }
         }
-
+#endif
         return ProcessHandle();
     }
 
