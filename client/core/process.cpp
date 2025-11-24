@@ -139,6 +139,30 @@ namespace Process
         return ProcessHandle();
     }
 
+    ProcessHandle getProcessByExeName(std::wstring exePath)
+    {
+        HANDLE processSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+        PROCESSENTRY32 processEntry;
+        processEntry.dwSize = sizeof(PROCESSENTRY32);
+
+        if (Process32First(processSnapshot, &processEntry) == TRUE) { 
+           while (Process32Next(processSnapshot, &processEntry) == TRUE)
+           {
+                std::wstring processExeFile = processEntry.szExeFile;
+
+                if (processExeFile == exePath) {
+                    ProcessHandle process;
+                    process.id = OpenProcess(PROCESS_ALL_ACCESS,
+                                                 FALSE,
+                                                 processEntry.th32ProcessID);
+                    return process;
+               }
+           }
+        }
+
+        return ProcessHandle();
+    }
+
     std::wstring getProcessPath(ProcessHandle& process)
     {
 #if defined(_WIN32)

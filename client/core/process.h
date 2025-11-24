@@ -46,6 +46,9 @@ namespace Process
     // Gets a current running process by its executable path (absolute path)
     ProcessHandle getProcess(std::wstring exePath);
 
+    // Gets a current running process by its executable name
+    ProcessHandle getProcessByExeName(std::wstring exePath);
+
     // Returns the absolute path of the process executable
     std::wstring getProcessPath(ProcessHandle& process);
 
