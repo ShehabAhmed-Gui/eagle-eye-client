@@ -38,7 +38,7 @@ void KeychainManager::readKey(const QString &key)
 
     connect(&m_readJob, &QKeychain::WritePasswordJob::finished, [=]() {
         if (m_readJob.error()) {
-            logger.critical() << "Read job failed with error:" << m_readJob.errorString();
+//            logger.critical() << "Read job failed with error:" << m_readJob.errorString();
             return;
         }
 
