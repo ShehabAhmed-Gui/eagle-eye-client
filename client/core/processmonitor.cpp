@@ -1,12 +1,29 @@
+#include "logger.h"
 #include "processmonitor.h"
 #include "process.h"
 
+
+namespace {
+Logger logger("ProcessMonitor");
+}
+
 ProcessMonitor::ProcessMonitor()
-{}
+{
+    process = Process::getProcessByExeName(L"TestChamber.exe");
+
+    if (process.isEmpty()) {
+        logger.error() << "Couldn't find the test chamber process";
+    }
+    else {
+        logger.info() << "Test chamber process found";
+    }
+}
 
 ViolationType ProcessMonitor::run()
 {
-    Process::ProcessHandle process = {};
+    if (process.isEmpty()) {
+        return ViolationType::NoViolation;
+    }
 
     // Run checks one by one
     if (Process::hasDebugger(process)) {
