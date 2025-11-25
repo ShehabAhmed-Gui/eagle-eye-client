@@ -56,7 +56,7 @@ void HashManager::activate()
 QByteArray HashManager::calculateHash(const QString &filePath)
 {
     // Maximum size of a chunk in bytes
-    const int FILE_CHUNK_SIZE = 1000000;
+    const int FILE_CHUNK_SIZE = 64 * 1024;
 
     QFile file(filePath);
     if (!file.open(QIODevice::ExistingOnly | QIODevice::ReadOnly)) {
@@ -68,13 +68,11 @@ QByteArray HashManager::calculateHash(const QString &filePath)
     hmac_sha256_state sha;
     hmac_sha256_init(&sha, fileSize);
 
-    QDataStream dataStream(&file);
     std::array<char, FILE_CHUNK_SIZE> chunk;
     int chunk_len = 0;
-    
-    while (dataStream.atEnd() == false)
+    while (file.atEnd() == false)
     {
-        chunk_len = dataStream.readRawData(chunk.data(), FILE_CHUNK_SIZE);
+        chunk_len = file.read(chunk.data(), FILE_CHUNK_SIZE);
         hmac_sha256_update(&sha, chunk.data(), chunk_len);
     }
 

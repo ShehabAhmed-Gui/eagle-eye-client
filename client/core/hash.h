@@ -38,6 +38,7 @@ struct sha256_state
 {
     std::array<uint32_t, 8> hash;
     std::array<char, 64> buffer;
+    std::array<uint32_t, 64> schedule;
     int buffer_len;
     uint64_t message_len; //the length of the entire data, in bytes.
     //if you are processing a 5000 kilobyte file
