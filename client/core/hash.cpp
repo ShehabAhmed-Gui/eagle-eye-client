@@ -241,34 +241,29 @@ void sha256_update(sha256_state* state, const char* block, int block_len)
 {
     if (state->buffer_len > 0)
     {
-        for (int i = 0; i < block_len; i++)
-        {
-            state->buffer[state->buffer_len] = block[i];
-            state->buffer_len++;
-
-            if (state->buffer_len == 64)
-            {
-                std::array<uint32_t, 64> schedule = prepare_schedule(state->buffer.data());
-                process_schedule(schedule, state->hash.data());
-
-                state->buffer_len = 0;
-                block += i;
-                block_len -= i;
-                break;
-            }
+        int needed = 64 - state->buffer_len;
+        if (needed > block_len) {
+            needed = block_len;
         }
+        memcpy(state->buffer.data() + state->buffer_len, block, needed);
 
-        if (state->buffer_len != 0)
-        {
-            //we couldn't fill the buffer, there is nothing to process
+        if (state->buffer_len == 64) {
+            state->schedule = prepare_schedule(state->buffer.data());
+            process_schedule(state->schedule, state->hash.data());
+
+            state->buffer_len = 0;
+            block += needed;
+            block_len -= needed;
+        }
+        else {
             return;
         }
     }
 
     while (block_len >= 64)
     {
-        std::array<uint32_t, 64> schedule = prepare_schedule(block);
-        process_schedule(schedule, state->hash.data());
+        state->schedule = prepare_schedule(block);
+        process_schedule(state->schedule, state->hash.data());
 
         block_len -= 64;
         block += 64;
