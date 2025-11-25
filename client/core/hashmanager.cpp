@@ -63,7 +63,7 @@ void HashManager::activate()
 QByteArray HashManager::calculateHash(const QString &filePath)
 {
     // Maximum size of a chunk in bytes
-    const int FILE_CHUNK_SIZE = 1000000;
+    const int FILE_CHUNK_SIZE = 64 * 1024;
 
     QFile file(filePath);
     if (!file.open(QIODevice::ExistingOnly | QIODevice::ReadOnly)) {
