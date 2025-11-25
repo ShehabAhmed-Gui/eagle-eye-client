@@ -15,28 +15,17 @@
 #define KEYCHAINMANAGER_H
 
 #include <QObject>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 
-#include <keychain.h>
-
-class KeychainManager : public QObject
+class HashConfigManager
 {
-    Q_OBJECT
 public:
-    explicit KeychainManager(QObject *parent = nullptr);
+    explicit HashConfigManager();
 
-    void writeKey(const QString &key, const QString &value);
-    void readKey(const QString &key);
-
-    // To be used to clean up
-    void deleteKey(const QString &key);
-
-signals:
-    void readyRead(const QString &data);
-
-private:
-    QKeychain::WritePasswordJob m_writeJob;
-    QKeychain::ReadPasswordJob m_readJob;
-    QKeychain::DeletePasswordJob m_deleteJob;
+    static void storeHashes(const QVector<QByteArray> &hashes);
+    static QVector<QByteArray> getStoredHashes();
 };
 
 #endif // KEYCHAINMANAGER_H

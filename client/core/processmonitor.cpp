@@ -17,7 +17,6 @@
 #include "filesmanager.h"
 #include "utils.h"
 
-
 namespace {
 Logger logger("ProcessMonitor");
 }
@@ -37,27 +36,25 @@ ProcessMonitor::ProcessMonitor()
 
 ViolationType ProcessMonitor::run()
 {
-    // First, check if EagleEye is running
+    // 1. Check if our service is running
     // in a debugger
-    // Process::ProcessHandle process = {};
-    // process.id = GetCurrentProcess();
-    // if (Process::hasDebugger(process)) {
-    //     return ViolationType::EaglEyeRunningInADebugger;
-    // }
-    if (process.isEmpty()) {
-        return ViolationType::NoViolation;
+    Process::ProcessHandle process = {};
+    process.id = GetCurrentProcess();
+    if (Process::hasDebugger(process)) {
+        return ViolationType::EagleEyeRunningInADebugger;
     }
 
-    // // Second, check if any process
-    // // of the the main app is running in a debugger
-    // for (const QString &file : FilesManager::getExeFiles(Utils::getAppPath())) {
-    //     // Get a handle to the process
-    //     process = Process::getHandleToProcess(file);
-    //     if (Process::hasDebugger(process)) {
-    //         return ViolationType::DebuggerViolation;
-    //     }
-    // }
+    // 2. Check if any process
+    // of the the main app is running in a debugger
+    for (const QString &file : FilesManager::getExeFiles(Utils::getPrimaryAppPath())) {
+        // Get a handle to the process
+        process = Process::getHandleToProcess(file);
+        if (Process::hasDebugger(process)) {
+            return ViolationType::DebuggerViolation;
+        }
+    }
 
+    // 3. Check for injected dlls
     std::vector<std::wstring> currentModules = Process::getProcessModules(process);
     if (currentModules != processModules)
     {

@@ -30,7 +30,8 @@ namespace Process
     bool ProcessHandle::isEmpty()
     {
 #if defined(_WIN32)
-        return id == INVALID_HANDLE_VALUE;
+        // Only nullptr is considered empty, pseudo-handle -1 is valid
+        return id == nullptr;
 #endif
         return false;
     }
@@ -46,7 +47,7 @@ namespace Process
         }
 
         if (!process.isEmpty()) {
-            // Checks if the process running in a debugger
+            // Checks if the process is attached to a debugger
             success = CheckRemoteDebuggerPresent(process.id, &result);
         } else {
             logger.critical() << "Invalid process";
@@ -112,7 +113,6 @@ namespace Process
         QueryFullProcessImageName(process.id, 0, processPath, &processPathSize);
 
         return std::wstring(processPath);
-
 #endif
         return L"";
     }

@@ -32,24 +32,18 @@ CoreController::CoreController(QObject *parent)
 
 void CoreController::init()
 {
-    // Our app will be in a subfolder of the main folder
-    QDir dir = QDir(Utils::getAppPath());
-    // dir.cdUp();
-    m_originalPath = dir.path();
-
-    m_keychainManger.reset(new KeychainManager(this));
-    m_hashManager.reset(new HashManager(m_originalPath, m_keychainManger, this));
+    m_hashManager.reset(new HashManager(this));
 
     m_securityMonitor.reset(new SecurityMonitor(m_hashManager, this));
+    m_securityMonitor->activate();
 
     m_daemonServer = new DaemonLocalServer(m_securityMonitor, this);
     m_daemonServer->start();
-
-    connect(m_keychainManger.get(), &KeychainManager::readyRead, m_hashManager.get(), &HashManager::onReadyRead);
 }
 
 void CoreController::onViolationDetected()
 {
+    // TODO: On violation, ping the primary app
 }
 
 bool CoreController::killProcess(const QString &fileName)

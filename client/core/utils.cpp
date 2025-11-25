@@ -10,22 +10,22 @@ Utils::Utils() {}
 QString Utils::getOpenSSLPath()
 {
 #if defined(Q_OS_WIN)
-    return QCoreApplication::applicationDirPath() + "/openssl/openssl.exe";
+    return QString(QCoreApplication::applicationDirPath() + "//openssl/openssl.exe");
 #endif
 }
 
 QByteArray Utils::getSecureKey()
 {
     QString opensslPath = getOpenSSLPath();
-    logger .debug() << "using openssl path:" << opensslPath;
     QStringList args;
     args << "rand" << "-hex" << "32";
     QProcess process;
 
-    process.setArguments(args);
     process.setProgram(opensslPath);
-    bool ok = process.waitForFinished(3000);
+    process.setArguments(args);
+    process.start();
 
+    bool ok = process.waitForFinished(3000);
     if (!ok) {
         logger.error() << "QProcess failed with error:" << process.errorString();
         return QByteArray();
@@ -33,7 +33,8 @@ QByteArray Utils::getSecureKey()
 
     QByteArray output = process.readAllStandardOutput();
 
-    logger.debug() << "generated secure key:" << output;
+    // TODO: remove this debug statement
+    logger.debug() << "Generated secure key:" << output;
 
     return output;
 }
@@ -41,4 +42,12 @@ QByteArray Utils::getSecureKey()
 QString Utils::getAppPath()
 {
     return QCoreApplication::applicationDirPath();
+}
+
+QString Utils::getPrimaryAppPath()
+{
+    QDir dir(QCoreApplication::applicationDirPath());
+    dir.cdUp();
+
+    return dir.absolutePath();
 }

@@ -88,6 +88,8 @@ void Logger::init()
         return;
     }
 
+    m_logFile.resize(0);
+
     QString messagePattern = QString("%{time yyyy-MM-dd hh:mm:ss} %{type} %{message}");
     qSetMessagePattern(messagePattern);
     qInstallMessageHandler(logsMessageHandler);
@@ -125,6 +127,7 @@ Logger::Log::~Log()
         break;
     case Critical:
         qCritical() << m_logger->m_className << m_data->m_buffer.trimmed();
+        break;
     default:
         qCritical() << m_logger->m_className << m_data->m_buffer.trimmed();;
         break;

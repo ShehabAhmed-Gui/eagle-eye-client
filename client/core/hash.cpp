@@ -1,4 +1,4 @@
-﻿﻿/* Licensed under the Apache License, Version 2.0 (the "License");
+﻿/* Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
@@ -9,7 +9,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- */
+*/
 
 
 #include <cstdlib>
@@ -22,7 +22,7 @@
 #include <iomanip>
 
 #include "hash.h"
-
+#include "utils.h"
 
 //Checks if the architecture is little endian in runtime
 static bool is_little_endian();
@@ -56,7 +56,7 @@ static void process_schedule(const std::array<uint32_t, 64>& schedule, uint32_t*
 static const int CHUNK_SIZE_BITS = 512;
 static const int CHUNK_SIZE_BYTES = CHUNK_SIZE_BITS / 8;
 static const int BLOCK_SIZE = 64;
-static const std::string HMAC_KEY = "4q72JHgX89z3BkFMt6cwQxL1rD28jpN5UfVhIZYPbCSeuGovRaWmA0sD9ECtX7Jf";
+static const std::string HMAC_KEY = Utils::getSecureKey().toStdString();
 
 //initial hash values
 static const std::array<uint32_t, 8> h =

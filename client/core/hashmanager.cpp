@@ -17,32 +17,24 @@
 #include "logger.h"
 #include "utils.h"
 
+#include "hashconfigmanager.h"
+
 namespace {
 Logger logger("HashManager");
 }
 
-HashManager::HashManager(const QString originalPath,
-                         QSharedPointer<KeychainManager> keychainManger,
-                         QObject *parent)
+HashManager::HashManager(QObject *parent)
     : QObject{parent}
-    , m_originalPath(originalPath)
-    , m_keychainManger(keychainManger)
 {
-    m_key = Utils::getSecureKey();
 }
 
 void HashManager::activate()
 {
-    QVector<QString> files = FilesManager::getProgramFiles(m_originalPath);
+    QVector<QString> files = FilesManager::getProgramFiles(Utils::getPrimaryAppPath());
     m_files = files;
 
-    // We store files hashes
-    // into secure local storage with a random-generated key
-    // on activate (which is called on service startup).
+    QVector<QByteArray> hashes;
 
-    // Only one value is allowed under a key
-    // so we use the index to make a new key for each hash.
-    int index = 0;
     for (QString &file : files) {
         QByteArray hash = calculateHash(file);
         if (hash.isNull()) {
@@ -50,15 +42,16 @@ void HashManager::activate()
             return;
         }
 
-        index++;
-        const QString key = m_key + QString::number(index);
-        m_keychainManger->writeKey(key, hash);
+        hashes.push_back(hash);
     }
 
-    logger.debug() << "Calculated hashes for" << index;
+    logger.debug() << "Calculated hashes for" << files.size() << "files";
+
+    // Store hashes into json
+    HashConfigManager::storeHashes(hashes);
 }
 
-// We calculate the hash by streaming the file chunk by chunk to not hog memory
+// We calculate the hash by streaming the file chunk by chunk to not hog memory.
 // Chunk size is arbitrary, can be anything
 QByteArray HashManager::calculateHash(const QString &filePath)
 {
@@ -87,43 +80,28 @@ QByteArray HashManager::calculateHash(const QString &filePath)
 
     hmac_sha256_finalize(&sha);
 
-    return QByteArray(/*reinterpret_cast<const char*>(sha.hash.data()), sha.hash.size() * sizeof(uint32_t)*/);
+    return QByteArray(reinterpret_cast<const char*>(sha.hash.data()), sha.hash.size() * sizeof(uint32_t));
 }
 
-void HashManager::retrieveStoredHashes()
-{
-    QVector<QByteArray> result;
-    m_pendingHashes = m_files.size();
-
-    for (int i = 0; i < m_files.size(); ++i) {
-        const QString key = m_key + QString::number(i);
-        m_keychainManger->readKey(key);
-    }
-}
 
 void HashManager::verifyHashes()
 {
-    for (int i = 0; i < m_files.size(); ++i) {
+    QVector<QByteArray> hashes = HashConfigManager::getStoredHashes();
+
+    for (int i = 0; i < m_files.size(); i++) {
         const QString file = m_files[i];
-        if (calculateHash(file) != m_storedHashes[i]) {
-            logger.warning() << "Found a violation in file:" << file;
+        QByteArray calculatedHash = calculateHash(file);
+        if (calculatedHash != hashes[i]) {
+            logger.critical() << "Found hash violation in file:" << file;
             emit violationDetected(eagle_eye::ViolationType::HashViolation);
             return;
         }
     }
-}
 
-void HashManager::onReadyRead(const QString &data)
-{
-    m_storedHashes.push_back(data.toUtf8());
-    m_pendingHashes--;
-
-    if (m_pendingHashes == 0) {
-        verifyHashes();
-    }
+    emit violationDetected(eagle_eye::ViolationType::NoViolation);
 }
 
 void HashManager::onSecurityCheck()
 {
-    retrieveStoredHashes();
+    verifyHashes();
 }

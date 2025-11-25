@@ -35,9 +35,7 @@ namespace Process
 #if defined(_WIN32)
         HANDLE id = INVALID_HANDLE_VALUE;
 #endif
-
         // Checks if the process id/handle is invalid
-        // based on the OS
         bool isEmpty();
     };
 
@@ -48,8 +46,6 @@ namespace Process
 
     // Gets a current running process by its executable path (absolute path)
     ProcessHandle getProcess(std::wstring exePath);
-
-    bool hasDebugger(ProcessHandle process);
 
     ProcessHandle getHandleToProcess(const QString &exePath);
 

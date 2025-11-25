@@ -37,7 +37,7 @@ void DaemonConnection::onReadyRead()
 
 bool DaemonConnection::compareAppId(const QString &appId)
 {
-    const QVector<QString> exeFiles = FilesManager::getExeFiles(Utils::getAppPath());
+    const QVector<QString> exeFiles = FilesManager::getExeFiles(Utils::getPrimaryAppPath());
 
     for (const QString &file : exeFiles) {
         const QFileInfo fileInfo(file);

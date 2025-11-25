@@ -22,9 +22,10 @@ set(SOURCES
     client/core/daemon/daemonlocalserver.cpp
     client/core/daemon/daemonconnection.cpp
     client/core/securitymonitor.cpp
-    client/core/keychainmanager.cpp
+    client/core/hashconfigmanager.cpp
     client/core/process.cpp
     client/core/processmonitor.cpp
+    client/core/utils.cpp
 )
 
 set(HEADERS
@@ -38,30 +39,19 @@ set(HEADERS
     client/core/daemon/daemonlocalserver.h
     client/core/daemon/daemonconnection.h
     client/core/securitymonitor.h
-    client/core/keychainmanager.h
+    client/core/hashconfigmanager.h
     client/core/process.h
     client/core/processmonitor.h
+    client/core/utils.h
 )
 
 include(3rdparty/service_src/qtservice.cmake)
-
-include_directories(
-    3rdparty/qkeychain/qtkeychain
-)
-
-# This is necessary, otherwise
-# we get a runtime missing dll error.
-set(BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-# Force qkeychain to use Qt6
-set(BUILD_WITH_QT6 ON)
-add_subdirectory(3rdparty/qkeychain/)
 
 add_subdirectory(test_chamber)
 
 qt_add_executable(${PROJECT}
     ${SOURCES}
     ${HEADERS}
-    client/core/utils.h client/core/utils.cpp
 )
 
 target_link_libraries(${PROJECT} PRIVATE
@@ -71,5 +61,4 @@ target_link_libraries(${PROJECT} PRIVATE
     Qt6::Gui
     Qt6::Network
     Qt6::Svg
-    qt6keychain
 )

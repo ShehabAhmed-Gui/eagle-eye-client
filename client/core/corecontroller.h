@@ -32,11 +32,9 @@ public slots:
     void onViolationDetected();
 
 private:
-    QString m_originalPath;
     bool killProcess(const QString &fileName);
 
     QSharedPointer<HashManager> m_hashManager;
-    QSharedPointer<KeychainManager> m_keychainManger;
     QSharedPointer<SecurityMonitor> m_securityMonitor;
     DaemonLocalServer* m_daemonServer;
 };

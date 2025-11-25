@@ -20,16 +20,13 @@
 #include <QCoreApplication>
 
 #include "defs.h"
-#include "keychainmanager.h"
 
 class HashManager : public QObject
 {
     Q_OBJECT
 
 public:
-    explicit HashManager(const QString originalPath,
-                         QSharedPointer<KeychainManager> keychainManger,
-                         QObject *parent = nullptr);
+    explicit HashManager(QObject *parent = nullptr);
 
     void activate();
 
@@ -40,20 +37,11 @@ signals:
     void violationDetected(eagle_eye::ViolationType type);
 
 public slots:
-    void onReadyRead(const QString &data);
     void onSecurityCheck();
 
 private:
     QByteArray calculateHash(const QString &filePath);
-    void retrieveStoredHashes();
-
-    QSharedPointer<KeychainManager> m_keychainManger;
-
-    QString m_key;
-    QString m_originalPath;
     QVector<QString> m_files;
-    QVector<QByteArray> m_storedHashes;
-    int m_pendingHashes = 0;
 };
 
 #endif // HASHMANAGER_H

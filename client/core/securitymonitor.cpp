@@ -14,7 +14,7 @@
 #include "securitymonitor.h"
 #include "logger.h"
 
-#define VERIFY_TIME_MSEC 2000
+#define VERIFY_TIME_MSEC 10000
 
 namespace {
 Logger logger("SecurityMonitor");
@@ -27,25 +27,23 @@ SecurityMonitor::SecurityMonitor(QSharedPointer<HashManager> hashManager,
 {
     connect(m_hashManager.get(), &HashManager::violationDetected, this, &SecurityMonitor::onViolationDetected);
 
-    m_timer = new QTimer(this);
-    connect(m_timer, &QTimer::timeout, this, &SecurityMonitor::integrityCheck);
-    logger.debug() << "Security monitor init";
-
     QJsonObject obj;
     obj.insert("allowed", true);
     setToken(obj);
 
     m_processMonitor.reset(new ProcessMonitor());
-
-    activate();
 }
 
 void SecurityMonitor::activate()
 {
     m_hashManager->activate();
 
+    m_timer = new QTimer(this);
+    connect(m_timer, &QTimer::timeout, this, &SecurityMonitor::integrityCheck);
+
     m_timer->setSingleShot(false);
     m_timer->start(VERIFY_TIME_MSEC);
+    logger.debug() << "Security monitor activiated";
 }
 
 void SecurityMonitor::setToken(const QJsonObject &token)
@@ -60,41 +58,53 @@ QJsonObject SecurityMonitor::token()
 
 void SecurityMonitor::integrityCheck()
 {
+    // 1. Run all process checks
     eagle_eye::ViolationType result = m_processMonitor->run();
     if (result != ViolationType::NoViolation) {
-        logger.critical() << "Violation detected";
         onViolationDetected(result);
         return;
     }
-    else {
-        logger.debug() << "No violation detected";
-    }
 
+    // 2. Run hash integrity check
     m_hashManager->onSecurityCheck();
 }
 
 void SecurityMonitor::onViolationDetected(eagle_eye::ViolationType type)
 {
-    m_timer->stop();
-
-    QJsonObject obj;
-    obj.insert("allowed", false);
-
     QString details;
-
     switch (type) {
+    case eagle_eye::ViolationType::NoViolation:
+        logger.debug() << "No violation is detected";
+        break;
     case eagle_eye::ViolationType::HashViolation:
         details = "Hash violation is detected";
+        logger.critical() << details;
         break;
     case eagle_eye::ViolationType::DebuggerViolation:
         details = "Process is running in a debugger";
+        logger.critical() << details;
+        break;
+    case eagle_eye::ViolationType::EagleEyeRunningInADebugger:
+        details = "EagleEye process is running in a debugger";
+        logger.critical() << details;
+        break;
+    case eagle_eye::DLLInjectionViolation:
+        details = "An injected DLL is detected";
+        logger.critical() << details;
         break;
     default:
         break;
     }
 
-    obj.insert("details", details);
-    setToken(obj);
+    // Don't do any action if there's no violation
+    if (type != eagle_eye::NoViolation) {
+        m_timer->stop();
 
-    emit integrityViolationDetected();
+        QJsonObject obj;
+        obj.insert("allowed", false);
+        obj.insert("details", details);
+        setToken(obj);
+
+        emit integrityViolationDetected();
+    }
 }

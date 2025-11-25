@@ -19,7 +19,7 @@ enum ViolationType {
     NoViolation = 0,
     HashViolation = 100,
     DebuggerViolation = 200,
-    EaglEyeRunningInADebugger = 201,
+    EagleEyeRunningInADebugger = 201,
     DLLInjectionViolation = 300
 };
 }
