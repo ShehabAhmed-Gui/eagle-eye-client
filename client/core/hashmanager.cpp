@@ -30,7 +30,7 @@ HashManager::HashManager(QObject *parent)
 
 void HashManager::activate()
 {
-    QVector<QString> files = FilesManager::getProgramFiles(Utils::getPrimaryAppPath());
+    QVector<QString> files = FilesManager::getProgramFiles(Utils::getMainAppLocation());
     m_files = files;
 
     QVector<QByteArray> hashes;

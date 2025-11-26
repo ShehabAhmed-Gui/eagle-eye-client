@@ -26,7 +26,12 @@ DaemonConnection::DaemonConnection(QSharedPointer<SecurityMonitor> securityMonit
     , m_securityMonitor(securityMonitor)
     , m_socket(socket)
 {
+    connected = true;
     connect(socket, &QLocalSocket::readyRead, this, &DaemonConnection::onReadyRead);
+    connect(socket, &QLocalSocket::disconnected, this, [=]{
+        logger.debug() << "Primary app's disconnected";
+        connected = false;
+    });
 }
 
 void DaemonConnection::onReadyRead()
@@ -37,7 +42,7 @@ void DaemonConnection::onReadyRead()
 
 bool DaemonConnection::compareAppId(const QString &appId)
 {
-    const QVector<QString> exeFiles = FilesManager::getExeFiles(Utils::getPrimaryAppPath());
+    const QVector<QString> exeFiles = FilesManager::getExeFiles(Utils::getMainAppLocation());
 
     for (const QString &file : exeFiles) {
         const QFileInfo fileInfo(file);

@@ -26,6 +26,9 @@ DaemonLocalServer::DaemonLocalServer(QSharedPointer<SecurityMonitor> securityMon
 {
     m_localServer = new QLocalServer(this);
     connect(m_localServer, &QLocalServer::newConnection, this, &DaemonLocalServer::onNewConnection);
+
+    connect(m_securityMonitor.get(), &SecurityMonitor::integrityViolationDetected, this,
+            &DaemonLocalServer::onViolationDetected);
 }
 
 void DaemonLocalServer::start()
@@ -35,9 +38,16 @@ void DaemonLocalServer::start()
     logger.debug() << "Started daemon local server.";
 }
 
+bool DaemonLocalServer::isConnected()
+{
+    return connected;
+}
+
 void DaemonLocalServer::onNewConnection()
 {
     logger.debug() << "New pipe connection";
+    connected = true;
+
     QLocalSocket *socket = m_localServer->nextPendingConnection();
     if (!socket) {
         logger.error() << "Invalid local socket pointer";
@@ -45,6 +55,27 @@ void DaemonLocalServer::onNewConnection()
     }
 
     m_connection = new DaemonConnection(m_securityMonitor, socket, this);
+
+    connect(socket, &QLocalSocket::disconnected, this, [=]{
+        logger.warning() << "Main process disconnected";
+        connected = false;
+    });
+}
+
+void DaemonLocalServer::onViolationDetected()
+{
+    if (!isConnected()) {
+        logger.critical() << "Primary app isn't connected to EagleEye";
+        // Fallback. If we can't communicate with main process, terminate it.
+        emit mainProcessNotConnected();
+        return;
+    }
+
+    // Ping the main process
+    QJsonObject message;
+    message.insert("status", "violation");
+    message.insert("details", m_securityMonitor->getViolationDetails());
+    m_connection->write(message);
 }
 
 QString DaemonLocalServer::getDaemonPath() const

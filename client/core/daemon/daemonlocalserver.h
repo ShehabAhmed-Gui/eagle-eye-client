@@ -30,11 +30,19 @@ public:
 
     void start();
 
+    bool isConnected();
+
+signals:
+    void mainProcessNotConnected();
+
 public slots:
     void onNewConnection();
+    void onViolationDetected();
 
 private:
     QString getDaemonPath() const;
+
+    bool connected = false;
 
     QSharedPointer<SecurityMonitor> m_securityMonitor;
 

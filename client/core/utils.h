@@ -27,8 +27,8 @@ public:
 
     static QString getOpenSSLPath();
     static QByteArray getSecureKey();
-    static QString getAppPath();
-    static QString getPrimaryAppPath();
+    static QString getServiceLocation();
+    static QString getMainAppLocation();
 };
 
 #endif // UTILS_H

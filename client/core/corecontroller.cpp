@@ -39,15 +39,25 @@ void CoreController::init()
 
     m_daemonServer = new DaemonLocalServer(m_securityMonitor, this);
     m_daemonServer->start();
+
+    connect(m_daemonServer, &DaemonLocalServer::mainProcessNotConnected, this,
+            &CoreController::onMainProcessNotConnected);
 }
 
-void CoreController::onViolationDetected()
+void CoreController::onMainProcessNotConnected()
 {
-    // TODO: On violation, ping the primary app
+    // Attempt to terminate every process of main app
+    QVector<QString> files = FilesManager::getExeFiles(Utils::getMainAppLocation());
+
+    for (const QString &file : std::as_const(files)) {
+        killProcess(file);
+    }
 }
 
 bool CoreController::killProcess(const QString &fileName)
 {
+    logger.debug() << "Terminating:" << fileName;
+
     // Take a snapshot of all processes in the system.
     HANDLE snapShot = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
     PROCESSENTRY32 pe32;
@@ -72,14 +82,13 @@ bool CoreController::killProcess(const QString &fileName)
         return false;
     }
 
+    QFileInfo fileExeName(fileName);
     while (hRes) {
-        if (wcscmp(pe32.szExeFile, fileName.toStdWString().c_str()) == 0) {
+        if (wcscmp(pe32.szExeFile, fileExeName.fileName().toStdWString().c_str()) == 0) {
             // Create a handle to the process
             HANDLE hprocess = OpenProcess(PROCESS_TERMINATE, false, (DWORD)pe32.th32ProcessID);
 
             if (hprocess != NULL) {
-                logger.debug() << "Terminating:" << fileName;
-
                 BOOL terminated = TerminateProcess(hprocess, 9);
                 if (!terminated) {
                     logger.error() << "TerminateProcess failed. Error:" << GetLastError();
@@ -90,6 +99,8 @@ bool CoreController::killProcess(const QString &fileName)
                 logger.error() << "Could not create a handle to the process";
                 return false;
             }
+        } else {
+            logger.debug() << "Process is not running";
         }
         hRes = Process32Next(snapShot, &pe32);
     }

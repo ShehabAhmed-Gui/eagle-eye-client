@@ -35,6 +35,8 @@ public:
     void setToken(const QJsonObject &token);
     QJsonObject token();
 
+    QString getViolationDetails();
+
 signals:
     void integrityViolationDetected();
 
@@ -43,6 +45,8 @@ public slots:
     void onViolationDetected(eagle_eye::ViolationType type);
 
 private:
+    QString m_violationDetails;
+
     QJsonObject m_token;
     QSharedPointer<HashManager> m_hashManager;
     QSharedPointer<ProcessMonitor> m_processMonitor;

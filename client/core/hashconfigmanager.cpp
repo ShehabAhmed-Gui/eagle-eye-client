@@ -28,7 +28,7 @@ void HashConfigManager::storeHashes(const QVector<QByteArray> &hashes)
     // If we let Qt resolve the current app dir for the file
     // it will use C:\Windows\System32 since services inherit
     // the working directory from SCM
-    const QString appDir = Utils::getAppPath();
+    const QString appDir = Utils::getServiceLocation();
     const QString storageFilePath = QDir(appDir).filePath("storage.json");
 
     QFile configFile(storageFilePath);
@@ -57,7 +57,7 @@ void HashConfigManager::storeHashes(const QVector<QByteArray> &hashes)
 
 QVector<QByteArray> HashConfigManager::getStoredHashes()
 {
-    const QString appDir = Utils::getAppPath();
+    const QString appDir = Utils::getServiceLocation();
     const QString storageFilePath = QDir(appDir).filePath("storage.json");
 
     QFile configFile(storageFilePath);

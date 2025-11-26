@@ -29,7 +29,7 @@ public:
     void init();
 
 public slots:
-    void onViolationDetected();
+    void onMainProcessNotConnected();
 
 private:
     bool killProcess(const QString &fileName);

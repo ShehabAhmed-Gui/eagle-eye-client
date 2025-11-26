@@ -52,12 +52,12 @@ QByteArray Utils::getSecureKey()
     return output;
 }
 
-QString Utils::getAppPath()
+QString Utils::getServiceLocation()
 {
     return QCoreApplication::applicationDirPath();
 }
 
-QString Utils::getPrimaryAppPath()
+QString Utils::getMainAppLocation()
 {
     QDir dir(QCoreApplication::applicationDirPath());
     dir.cdUp();

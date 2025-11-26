@@ -56,6 +56,11 @@ QJsonObject SecurityMonitor::token()
     return m_token;
 }
 
+QString SecurityMonitor::getViolationDetails()
+{
+    return m_violationDetails;
+}
+
 void SecurityMonitor::integrityCheck()
 {
     // 1. Run all process checks
@@ -78,18 +83,22 @@ void SecurityMonitor::onViolationDetected(eagle_eye::ViolationType type)
         break;
     case eagle_eye::ViolationType::HashViolation:
         details = "Hash violation is detected";
+        m_violationDetails = details;
         logger.critical() << details;
         break;
     case eagle_eye::ViolationType::DebuggerViolation:
         details = "Process is running in a debugger";
+        m_violationDetails = details;
         logger.critical() << details;
         break;
     case eagle_eye::ViolationType::EagleEyeRunningInADebugger:
         details = "EagleEye process is running in a debugger";
+        m_violationDetails = details;
         logger.critical() << details;
         break;
     case eagle_eye::DLLInjectionViolation:
         details = "An injected DLL is detected";
+        m_violationDetails = details;
         logger.critical() << details;
         break;
     default:
