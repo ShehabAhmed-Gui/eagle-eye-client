@@ -12,3 +12,5 @@ out/*
 /test_chamber/.vs
 /client/core/.vscode
 /3rdparty/qkeychain/translations
+/test_chamber/out
+/test_chamber/source/.vscode
