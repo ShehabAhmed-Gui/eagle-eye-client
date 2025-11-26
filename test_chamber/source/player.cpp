@@ -13,9 +13,14 @@
 
 #include "player.h"
 #include "gameconst.h"
+#include "game.h"
+
+#include <iostream>
 
 Player::Player()
 {
+    on_ground = false;
+
     x = 300;
     y = 300;
     w = 50;
@@ -31,14 +36,14 @@ Player::Player()
     velocity = {0};
     rotation = 0;
     rotation_speed = 0.8f;
-    max_rotation = 2.5f;
+    max_rotation = 1.5f;
 
     color = {160, 40, 40, 255};
 }
 
-void Player::update()
+void Player::update(GameMap& map)
 {
-    if (on_ground()) {
+    if (on_ground) {
         velocity.y = 0;
     }
     else {
@@ -55,14 +60,15 @@ void Player::update()
         halt_x_movement();
     }
 
-    if (IsKeyPressed(KEY_SPACE) && on_ground()) {
+    if (IsKeyPressed(KEY_SPACE)) {
         velocity.y = -jump_force;
     }
 
     x += velocity.x;
+    collide(map, {velocity.x, 0});
     y += velocity.y;
-
-    collide();
+    on_ground = false;
+    collide(map, {0, velocity.y});
 }
 
 void Player::draw()
@@ -105,41 +111,65 @@ void Player::draw()
     DrawRectanglePro(rect, origin, rotation, color);
 }
 
-void Player::collide()
+void Player::collide(GameMap& map, Vector2 velocity)
 {
-    int top_left = x - origin.x;
+    float x = this->x - origin.x;
+
     if ((y + h) >= WINDOW_HEIGHT) {
         y = WINDOW_HEIGHT - h;
+        on_ground = true;
     }
     else if (y < 0) {
         y = 0;
     }
 
-    if ((top_left + w) >= WINDOW_WIDTH) {
-        top_left = WINDOW_WIDTH - w;
+    if ((x + w) >= WINDOW_WIDTH) {
+        x = WINDOW_WIDTH - w;
 
         if (velocity.x > 0) {
             velocity.x = 0;
         }
     }
-    else if (top_left < 0) {
-        top_left = 0;
+    else if (x < 0) {
+        x = 0;
 
         if (velocity.x < 0) {
             velocity.x = 0;
         }
     }
 
-    x = top_left + origin.x;
-}
+    for (int tile_y = 0; tile_y < map.h; tile_y++)
+    {
+        for (int tile_x = 0; tile_x < map.w; tile_x++)
+        {
+            Rectangle rect = {x, y, w, h};
 
-bool Player::on_ground()
-{
-    if ((y + h) >= WINDOW_HEIGHT) {
-        return true;
+            int id = map.get_tile(tile_x, tile_y);
+            if (id == -1) {
+                continue;
+            }
+
+            Rectangle tile_rect = {tile_x * TILE_SIZE.x, tile_y * TILE_SIZE.y, TILE_SIZE.x, TILE_SIZE.y};
+            if (CheckCollisionRecs(rect, tile_rect) == true) {
+                if (velocity.x > 0) {
+                    x = tile_rect.x - this->w;
+                }
+                else if (velocity.x < 0) {
+                    x = tile_rect.x + tile_rect.width;
+                }
+
+                if (velocity.y > 0) {
+                    y = tile_rect.y - this->h;
+                    on_ground = true;
+                }
+                else if (velocity.y < 0) {
+                    y = tile_rect.y + tile_rect.height;
+                }
+            }
+        }
     }
 
-    return false;
+    this->x = x + origin.x;
 }
 
 void Player::accelerate(int dir)

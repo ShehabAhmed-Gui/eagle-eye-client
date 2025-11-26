@@ -16,6 +16,8 @@
 
 #include <raylib.h>
 
+#include "game.h"
+
 struct Player
 {
     float x;
@@ -35,13 +37,14 @@ struct Player
     float rotation_speed;
     float max_rotation;
 
+    bool on_ground;
+
     Color color;
 
     Player();
-    void update();
+    void update(GameMap& map);
     void draw();
-    void collide();
-    bool on_ground();
+    void collide(GameMap& map, Vector2 velocity);
 
     void accelerate(int dir);
     void halt_x_movement();
