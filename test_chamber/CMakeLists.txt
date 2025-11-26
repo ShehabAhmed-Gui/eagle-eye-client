@@ -25,10 +25,12 @@ endif()
 
 set(SOURCES source/main.cpp
             source/player.cpp
-            source/game.cpp)
+            source/game.cpp
+            source/cheat.cpp)
 set(HEADERS source/gameconst.h
             source/player.h
-            source/game.h)
+            source/game.h
+            source/cheat.h)
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 #set(raylib_VERBOSE 1)

@@ -11,8 +11,10 @@
  * limitations under the License.
  */
 
+#include <iostream>
 #include <raylib.h>
 
+#include "cheat.h"
 #include "gameconst.h"
 #include "game.h"
 
@@ -21,6 +23,13 @@ int main(void)
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "TestChamber");
     
     SetTargetFPS(TARGET_FPS);
+
+    if (is_anticheat_running()) {
+        std::cout << "INFO: Anticheat service is running.\n";
+    }
+    else {
+        std::cout << "INFO: Anticheat service is NOT running.\n";
+    }
     game_loop();
 
     CloseWindow();
