@@ -16,11 +16,16 @@ void game_loop()
     GameMap map = GameMap(WINDOW_WIDTH / TILE_SIZE.x, WINDOW_HEIGHT / TILE_SIZE.y);
     map.load_from_file("example_map.txt");
 
+    Texture2D background = LoadTexture("background.png");
+    Rectangle background_source = {0, 0, background.width, background.height};
+    Rectangle background_dest = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
     while (WindowShouldClose() == false)
     {
         BeginDrawing();
         ClearBackground(BACKGROUND_COLOR);
+        DrawTexture(background, 0, 0, WHITE);
 
+        DrawTexturePro(background, background_source, background_dest, {0, 0}, 0, WHITE);
         player.update(map);
         player.draw();
 
@@ -28,6 +33,8 @@ void game_loop()
 
         EndDrawing();
     }
+
+    UnloadTexture(background);
 }
 
 void draw_map(GameMap& map)
@@ -41,7 +48,7 @@ void draw_map(GameMap& map)
                 continue;
             }
 
-            Color color = WHITE;
+            Color color = BROWN;
 
             DrawRectangle(x * TILE_SIZE.x, y * TILE_SIZE.y,
                           TILE_SIZE.x, TILE_SIZE.y,
