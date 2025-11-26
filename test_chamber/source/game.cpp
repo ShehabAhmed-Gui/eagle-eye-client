@@ -21,7 +21,7 @@ void game_loop()
         BeginDrawing();
         ClearBackground(BACKGROUND_COLOR);
 
-        player.update();
+        player.update(map);
         player.draw();
 
         draw_map(map);
