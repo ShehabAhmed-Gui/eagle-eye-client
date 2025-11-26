@@ -14,9 +14,7 @@
 #include <raylib.h>
 
 #include "gameconst.h"
-#include "player.h"
-
-void game_loop();
+#include "game.h"
 
 int main(void)
 {
@@ -28,21 +26,5 @@ int main(void)
     CloseWindow();
 
     return 0;
-}
-
-void game_loop()
-{
-    Player player = Player();
-
-    while (WindowShouldClose() == false)
-    {
-        BeginDrawing();
-        ClearBackground(BACKGROUND_COLOR);
-
-        player.update();
-        player.draw();
-
-        EndDrawing();
-    }
 }
 
