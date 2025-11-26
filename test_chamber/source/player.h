@@ -11,20 +11,43 @@
  * limitations under the License.
  */
 
+#ifndef PLAYER_H
+#define PLAYER_H
+
 #include <raylib.h>
 
-#include "gameconst.h"
 #include "game.h"
 
-int main(void)
+struct Player
 {
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "TestChamber");
-    
-    SetTargetFPS(TARGET_FPS);
-    game_loop();
+    float x;
+    float y;
+    int w;
+    int h;
 
-    CloseWindow();
+    Vector2 velocity;
+    Vector2 origin; 
 
-    return 0;
-}
+    float speed;
+    float acceleration;
+    float friction; //how fast the player stops horizontal movement
+    float gravity;
+    float jump_force;
+    float rotation;
+    float rotation_speed;
+    float max_rotation;
 
+    bool on_ground;
+
+    Color color;
+
+    Player();
+    void update(GameMap& map);
+    void draw();
+    void collide(GameMap& map, Vector2 velocity);
+
+    void accelerate(int dir);
+    void halt_x_movement();
+};
+
+#endif

@@ -11,20 +11,16 @@
  * limitations under the License.
  */
 
+#ifndef GAMECONST_H
+#define GAMECONST_H
+
 #include <raylib.h>
 
-#include "gameconst.h"
-#include "game.h"
+const int WINDOW_WIDTH = 1280;
+const int WINDOW_HEIGHT = 720;
+const Color BACKGROUND_COLOR = {50, 50, 50, 255};
+const int TARGET_FPS = 60;
 
-int main(void)
-{
-    InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "TestChamber");
-    
-    SetTargetFPS(TARGET_FPS);
-    game_loop();
+const Vector2 TILE_SIZE = {64, 64};
 
-    CloseWindow();
-
-    return 0;
-}
-
+#endif
