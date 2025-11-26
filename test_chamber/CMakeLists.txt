@@ -23,8 +23,12 @@ endif()
 
 # Our Project
 
-set(SOURCES source/main.cpp source/player.cpp)
-set(HEADERS source/gameconst.h source/player.h)
+set(SOURCES source/main.cpp
+            source/player.cpp
+            source/game.cpp)
+set(HEADERS source/gameconst.h
+            source/player.h
+            source/game.h)
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 #set(raylib_VERBOSE 1)
