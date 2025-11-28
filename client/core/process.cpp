@@ -38,6 +38,8 @@ namespace Process
 
     bool hasDebugger(ProcessHandle& process)
     {
+        if (process.isEmpty()) return false;
+
 #if defined(_WIN32)
         BOOL result = FALSE;
         BOOL success;
@@ -217,6 +219,7 @@ namespace Process
         DWORD bytesNeeded;
         if (EnumProcessModules(process.id, modules, sizeof(modules), &bytesNeeded) == 0) {
             //TODO(omar): Log
+            return {};
         }
 
         int moduleCount = bytesNeeded / sizeof(HMODULE);
