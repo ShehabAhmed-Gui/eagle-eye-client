@@ -30,8 +30,8 @@ namespace Process
     bool ProcessHandle::isValid()
     {
 #if defined(_WIN32)
-        // Only nullptr is considered empty, pseudo-handle -1 is valid
-        return (id != nullptr) || (id != INVALID_HANDLE_VALUE);
+        // Only nullptr is considered empty.
+        return (id != nullptr) && (id != INVALID_HANDLE_VALUE);
 #endif
         return false;
     }
