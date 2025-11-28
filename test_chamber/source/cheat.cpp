@@ -44,7 +44,7 @@ namespace EagleEye
 #endif
     }
 
-    void Connection::connect()
+    bool Connection::connect()
     {
 #if defined(_WIN32)
         pipe = CreateFileA(pipe_name.data(),
@@ -55,9 +55,27 @@ namespace EagleEye
                                 FILE_ATTRIBUTE_NORMAL,
                                 nullptr);
         if (pipe == INVALID_HANDLE_VALUE) {
-            std::cout << "EAGLE-EYE Connection: Opening pipe failed. Error: " << GetLastError() << std::endl;
+//            std::cout << "EAGLE-EYE Connection: Opening pipe failed. Error: " << GetLastError() << std::endl;
+            return false;
         }
+        
+        return true;
+/*        else {
+            DWORD flags;
+            if (GetNamedPipeInfo(pipe, &flags, 0, 0, 0) == 0) {
+                std::cout << "GetNamedPipeInfo failed, code: " << GetLastError() << std::endl;
+                return;
+            }
+
+            if (flags & PIPE_TYPE_BYTE) {
+                std::cout << "Byte type" << std::endl;
+            }
+            else if (flags & PIPE_TYPE_MESSAGE) {
+                std::cout << "Message type" << std::endl;
+            }
+        }*/
 #endif
+        return false;
     }
 
     bool Connection::is_empty() const
@@ -86,6 +104,26 @@ namespace EagleEye
         return code != 0;
 #endif
         
+        return false;
+    }
+
+    bool Connection::is_message_pending() const
+    {
+        if (is_empty()) {
+            return false;
+        }
+
+#if defined(_WIN32)
+        DWORD msg_size;
+        PeekNamedPipe(pipe, nullptr,
+                      0, nullptr,
+                      &msg_size,
+                      nullptr);
+        
+        if (msg_size != 0) {
+            return true;
+        }
+#endif
         return false;
     }
 

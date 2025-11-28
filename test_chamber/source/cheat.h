@@ -29,11 +29,14 @@ public:
         Connection();
         ~Connection();
 
-        void connect();
+        bool connect();
         bool is_empty() const;
         bool send_token_request() const;
+
         bool send_message(const char* msg, int msg_size) const;
 
+        // returns true if there is a message waiting to be read by us
+        bool Connection::is_message_pending() const;
     };
 
     bool is_anticheat_running();
