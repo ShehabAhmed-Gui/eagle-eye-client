@@ -55,7 +55,8 @@ namespace EagleEye
                                 FILE_ATTRIBUTE_NORMAL,
                                 nullptr);
         if (pipe == INVALID_HANDLE_VALUE) {
-            std::cout << "EAGLE-EYE Connection: Opening pipe failed. Error: " << GetLastError() << std::endl;
+            std::cout << "Connecting to EagleEye pipe failed with error: "
+                      << GetLastError() << std::endl;
             return false;
         }
 
@@ -110,7 +111,8 @@ namespace EagleEye
                  MAX_MSG_SIZE,
                  &bytes_read,
                  nullptr) == 0) {
-            std::cout << "ReadFile failed, error: " << GetLastError() << std::endl;
+            std::cout << "ReadFile failed with error: "
+                      << GetLastError() << std::endl;
             return {};
         }
 
@@ -166,7 +168,8 @@ namespace EagleEye
         SC_HANDLE service_manager = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_ENUMERATE_SERVICE);
 
         if (service_manager == nullptr) {
-            std::cout << "EAGLE-EYE: OpenSCManager Failed with code: " << GetLastError() << std::endl;
+            std::cout << "OpenSCManager Failed with code: "
+                      << GetLastError() << std::endl;
             return false;
         }
 
