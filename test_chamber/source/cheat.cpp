@@ -62,22 +62,7 @@ namespace EagleEye
         }
 
         std::cout << "Connected to EagleEye's pipe" << std::endl;
-        
         return true;
-/*        else {
-            DWORD flags;
-            if (GetNamedPipeInfo(pipe, &flags, 0, 0, 0) == 0) {
-                std::cout << "GetNamedPipeInfo failed, code: " << GetLastError() << std::endl;
-                return;
-            }
-
-            if (flags & PIPE_TYPE_BYTE) {
-                std::cout << "Byte type" << std::endl;
-            }
-            else if (flags & PIPE_TYPE_MESSAGE) {
-                std::cout << "Message type" << std::endl;
-            }
-        }*/
 #endif
         return false;
     }
@@ -98,7 +83,7 @@ namespace EagleEye
         std::cout << "Sending message: " << msg << std::endl;
 
 #if defined(_WIN32)
-        //Send message
+        // Send message
         DWORD bytes_written;
 
         int code = WriteFile(pipe,
@@ -192,7 +177,8 @@ namespace EagleEye
 
         DWORD bytes_needed;
         DWORD service_count;
-        //First call to get the required size of the array 
+
+        // First call to get the required size of the array
         EnumServicesStatusA(service_manager,
                         SERVICE_WIN32,
                         SERVICE_ACTIVE,  
@@ -204,7 +190,7 @@ namespace EagleEye
 
         ENUM_SERVICE_STATUSA* services = (ENUM_SERVICE_STATUSA*)calloc(1, bytes_needed);
 
-        //Second call to get the services status
+        // Second call to get the services status
         EnumServicesStatusA(service_manager,
                         SERVICE_WIN32,
                         SERVICE_ACTIVE,  
@@ -230,7 +216,6 @@ namespace EagleEye
         return false;
 
 #endif
-
         return false;
     }
 }
