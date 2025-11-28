@@ -57,7 +57,7 @@ void CoreController::onMainProcessNotConnected()
 //TODO() move this to the process module
 bool CoreController::killProcess(const QString &fileName)
 {
-    logger.debug() << "Terminating:" << fileName;
+/*    logger.debug() << "Terminating:" << fileName;
 
     // Take a snapshot of all processes in the system.
     HANDLE snapShot = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
@@ -104,7 +104,16 @@ bool CoreController::killProcess(const QString &fileName)
             logger.debug() << "Process is not running";
         }
         hRes = Process32Next(snapShot, &pe32);
+    }*/
+
+    Process::ProcessHandle process = Process::getProcess(fileName.toStdWString());
+    if (process.isEmpty()) {
+        logger.debug() << "Process is not running";
+        return false;
     }
+
+    Process::closeProcess(process);
+    logger.debug() << "Terminated process:" << fileName;
 
     return true;
 }
