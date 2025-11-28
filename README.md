@@ -12,7 +12,7 @@ EagleEye is a Windows, macOS, Linux service/deamon aimed to protect desktop appl
 EagleEye is developed as a service/daemon to always be running in the background with no user interactions. And to not show annoying UAC popup to ask for privileges. And to make integration easier. 
 On Windows: It communicates with your software using a named-pipe.
 
-Documenation is available in **docs** folder.
+Documentation is available in **docs** folder.
 
 
 ## LICENSE
