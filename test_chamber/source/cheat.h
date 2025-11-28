@@ -5,17 +5,22 @@ namespace EagleEye
 {
     struct Connection
     {
-#if defined(_WIN32)
+
+private:
+    #if defined(_WIN32)
         typedef void* HANDLE;
         HANDLE pipe;
-#endif
+    #endif
 
+public:
         Connection();
-        bool is_empty() const;
-    };
+        ~Connection();
 
-    Connection create_connection();
-    bool send_token_request(const Connection& connection);
+        bool is_empty() const;
+        bool send_token_request() const;
+        bool send_message(const char* msg, int msg_size) const;
+
+    };
 
     bool is_anticheat_running();
 }
