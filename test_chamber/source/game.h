@@ -29,6 +29,7 @@ private:
     EagleEye::Connection ac_connection;
 
     void init_anticheat();
+    void handle_anticheat_message(std::string msg);
 public:
     GameMap map;
 

@@ -21,6 +21,7 @@
 #include "game.h"
 #include "gameconst.h"
 #include "player.h"
+#include "vendor/json.hpp"
 
 Game::Game()
 {
@@ -46,10 +47,12 @@ void Game::loop()
         if (ac_connection.is_empty()) {
             ac_connection.connect(); //try connecting
         }
+
         std::string msg = ac_connection.read_message();
         if (msg.empty() == false) {
-            std::cout << msg << std::endl;
+            handle_anticheat_message(msg);
         }
+
         update();
         draw();
     }
@@ -90,6 +93,18 @@ void Game::init_anticheat()
     }
     else {
         std::cout << "INFO: Anticheat service is NOT running.\n";
+    }
+}
+
+void Game::handle_anticheat_message(std::string msg)
+{
+    using nlohmann::json;
+    json json_object = json::parse(msg);
+
+    if (json_object.is_object()) {
+        if (json_object["status"] == "violation") {
+            std::cout << "A violation has been detected, details: " << json_object["details"] << std::endl;
+        }
     }
 }
 
