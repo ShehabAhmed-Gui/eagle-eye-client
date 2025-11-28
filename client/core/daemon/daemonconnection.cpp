@@ -81,6 +81,9 @@ void DaemonConnection::parseCommand(const QByteArray &command)
 
 void DaemonConnection::write(const QJsonObject &obj)
 {
-    m_socket->write(QJsonDocument(obj).toJson(QJsonDocument::Compact));
-    m_socket->write("\n");
+    QByteArray msg = QJsonDocument(obj).toJson(QJsonDocument::Compact);
+    msg.push_back('\n');
+    m_socket->write(msg);
+//    m_socket->write(QJsonDocument(obj).toJson(QJsonDocument::Compact));
+//    m_socket->write("\n");
 }
