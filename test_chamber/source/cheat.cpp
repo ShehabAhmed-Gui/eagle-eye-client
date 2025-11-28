@@ -173,16 +173,13 @@ namespace EagleEye
             return false;
         }
 
-        // TODO(omar): The SERVICE_ACTIVE flag includes paused/pause pending etc services
-        // think about if this could be a problem for us
-
-        DWORD bytes_needed;
+        DWORD bytes_needed = NULL;
         DWORD service_count;
 
         // First call to get the required size of the array
         EnumServicesStatusA(service_manager,
                         SERVICE_WIN32,
-                        SERVICE_ACTIVE,  
+                        SERVICE_ACTIVE,
                         NULL,            
                         0,
                         &bytes_needed,
@@ -204,6 +201,12 @@ namespace EagleEye
         for (int i = 0; i < service_count; i++)
         {
             if (service_name == services[i].lpServiceName) {
+                if (services[i].ServiceStatus.dwCurrentState == SERVICE_STOPPED) {
+                    CloseServiceHandle(service_manager);
+                    free(services);
+                    return false;
+                }
+
                 CloseServiceHandle(service_manager);
                 free(services);
 

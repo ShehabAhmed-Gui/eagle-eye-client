@@ -127,16 +127,17 @@ void Game::init_anticheat()
 {
     ac_connection = EagleEye::Connection();
 
-    if (EagleEye::is_anticheat_running()) {
-        std::cout << "INFO: Anticheat service is running.\n";
-
-        ac_connection.connect();
-        if (ac_connection.send_token_request() == true) {
-            std::cout << "INFO: Sent token request to anticheat service.\n";
-        }
-    }
-    else {
+    if (!EagleEye::is_anticheat_running()) {
         std::cout << "INFO: Anticheat service is NOT running.\n";
+        on_violation("Anti-cheat service isn't running");
+        return;
+    }
+
+    std::cout << "INFO: Anticheat service is running.\n";
+
+    ac_connection.connect();
+    if (ac_connection.send_token_request() == true) {
+        std::cout << "INFO: Sent token request to anticheat service.\n";
     }
 }
 
