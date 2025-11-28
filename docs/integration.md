@@ -13,8 +13,9 @@ Goals
 
 Prerequisites
 - Installer must run with Administrator privileges.
-- EagleEye app directory must be avaialble in your software developer.
+- EagleEye must be avaialble in your software directory as a child directory.
 - Target machine: Windows (service + named pipes supported).
+- Your Pipe messages must end with a newline-terminator.
 
 Installing the service
 ----------------------
@@ -67,7 +68,9 @@ Pipe path: \\\\.\\pipe\\eagleeye
 
 - Connect to the pipe and keep the connection open for the lifetime of your app. Do not disconnect after the initial exchange: EagleEye may send asynchronous violation notifications while your app is running.
 - Communication format: JSON messages over the named pipe.
-- Message framing: treat JSON messages as newline-terminated.
+- Message framing: 
+  - EagleEye messages will always end with a newline terminator (this is. '\\n')
+  - Your named-pipe messages **must** end with newline-terminator (this is. \\n).
 
 Workflow at application startup
 -------------------------------
@@ -130,6 +133,7 @@ Security considerations
 Troubleshooting
 ---------------
 EagleEye logs everything at: **C:/ProgramData/EagleEye/logs**, in case of EagleEye malfunction, send us the logs file. For contact information, look at the top-level readme file.
+- If you receive invalid/empty messages, make sure you are using valid terminators as described in this documenation.
 - If you cannot connect to \\\\.\\pipe\\eagleeye:
   - Confirm EagleEye service is running.
   - Confirm the service created the pipe(check EagleEye logs).

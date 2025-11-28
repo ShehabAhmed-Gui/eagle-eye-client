@@ -37,7 +37,31 @@ DaemonConnection::DaemonConnection(QSharedPointer<SecurityMonitor> securityMonit
 void DaemonConnection::onReadyRead()
 {
     QByteArray command = m_socket->readAll();
-    parseCommand(command);
+
+    // Check if message is complete
+    if (!command.isEmpty()) {
+        m_buffer.append(command);
+    }
+
+    while (true) {
+        int pos = m_buffer.indexOf('\n');
+        if (pos == -1) {
+            break;
+        }
+
+        // Remove null bytes
+        m_buffer.replace('\0', "");
+
+        QByteArray line = m_buffer.left(pos);
+        m_buffer.remove(0, pos + 1);
+
+        line = line.trimmed();
+        if (line.isEmpty()) {
+            continue;
+        }
+
+        parseCommand(line);
+    }
 }
 
 bool DaemonConnection::compareAppId(const QString &appId)
@@ -57,7 +81,7 @@ bool DaemonConnection::compareAppId(const QString &appId)
     return false;
 }
 
-void DaemonConnection::parseCommand(const QByteArray &command)
+void DaemonConnection::parseCommand(QByteArray &command)
 {
     // Parse commands as json
     QJsonDocument doc = QJsonDocument::fromJson(command);
@@ -66,7 +90,7 @@ void DaemonConnection::parseCommand(const QByteArray &command)
     const QString cmd = obj.value("cmd").toString();
     logger.debug() << "Parsing command:" << cmd;
 
-    if (cmd == "token_request") {
+    if (cmd.toLower() == "token_request") {
         const QString appId = obj.value("app_id").toString();
         if (!compareAppId(appId)) {
             logger.error() << "Received incorrect app id";

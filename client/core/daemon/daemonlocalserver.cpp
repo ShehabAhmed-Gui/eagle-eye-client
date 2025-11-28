@@ -72,6 +72,7 @@ void DaemonLocalServer::onViolationDetected()
     }
 
     // Ping the main process
+    logger.debug() << "Sending a violation message to main app";
     QJsonObject message;
     message.insert("status", "violation");
     message.insert("details", m_securityMonitor->getViolationDetails());

@@ -31,7 +31,7 @@ void ProcessMonitor::lookForProcess()
     process = Process::getProcessByExeName(L"TestChamber.exe");
 
     if (process.isValid() == false) {
-        logger.error() << "Couldn't find the test chamber process";
+        //logger.error() << "Couldn't find the test chamber process";
     }
     else {
         logger.info() << "Test chamber process found";

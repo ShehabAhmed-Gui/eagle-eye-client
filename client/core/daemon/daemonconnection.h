@@ -37,10 +37,12 @@ public slots:
 
 private:
     bool compareAppId(const QString &appId);
-    void parseCommand(const QByteArray &command);
+    void parseCommand(QByteArray &command);
 
     QLocalSocket *m_socket;
     QSharedPointer<SecurityMonitor> m_securityMonitor;
+
+    QByteArray m_buffer;
 
     bool connected = false;
 };

@@ -26,7 +26,7 @@
 
 namespace EagleEye
 {
-    const std::string service_name = "EagleEye";
+    const std::string service_name = "EagleEye service";
     const std::string pipe_name = R"(\\.\pipe\eagleeye)";
     const std::string app_id = "com.test.TestChamber";
 
@@ -57,9 +57,11 @@ namespace EagleEye
                                 FILE_ATTRIBUTE_NORMAL,
                                 nullptr);
         if (pipe == INVALID_HANDLE_VALUE) {
-//            std::cout << "EAGLE-EYE Connection: Opening pipe failed. Error: " << GetLastError() << std::endl;
+            std::cout << "EAGLE-EYE Connection: Opening pipe failed. Error: " << GetLastError() << std::endl;
             return false;
         }
+
+        std::cout << "Connected to EagleEye's pipe" << std::endl;
         
         return true;
 /*        else {
@@ -92,6 +94,8 @@ namespace EagleEye
         if (is_empty()) {
             return false;
         }
+
+        std::cout << "Sending message: " << msg << std::endl;
 
 #if defined(_WIN32)
         //Send message
@@ -168,6 +172,7 @@ namespace EagleEye
         msg["cmd"] = "token_request";
         msg["app_id"] = app_id;
         std::string msg_str = msg.dump();
+        msg_str.push_back('\n');
 
         return send_message(msg_str.data(), msg_str.size() + 1);
     }

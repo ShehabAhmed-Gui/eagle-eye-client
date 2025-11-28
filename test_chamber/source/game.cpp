@@ -101,7 +101,7 @@ void Game::draw()
             Color color = {200, 20, 20, 255};
             draw_centered_text("Violation Detected", 0.25f, 48, color);
 
-            draw_centered_text("An Anticheat Violation has been detected in your game. Therefore you have been locked out temporarily.", 0.5f, 24, color);
+            draw_centered_text("We detected an anti-cheat violation during gameplay.\nYour access has been temporarily suspended for security reasons.", 0.5f, 24, color);
         } break;
     }
 
@@ -146,9 +146,18 @@ void Game::handle_anticheat_message(std::string msg)
     json json_object = json::parse(msg);
 
     if (json_object.is_object()) {
+        // 1. Handle token request reply
+        if (json_object["allowed"] == false) {
+            on_violation(json_object["details"]);
+            return;
+        }
+
+        // 2. Handle runtime violations
         if (json_object["status"] == "violation") {
             on_violation(json_object["details"]);
         }
+    } else {
+        std::cout << "Expected a json object" << std::endl;
     }
 }
 
