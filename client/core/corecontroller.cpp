@@ -48,72 +48,7 @@ void CoreController::onMainProcessNotConnected()
 {
     // Attempt to terminate every process of main app
     QVector<QString> files = FilesManager::getExeFiles(Utils::getMainAppLocation());
-
     for (const QString &file : std::as_const(files)) {
-        killProcess(file);
+        Process::killProcess(file);
     }
-}
-
-//TODO() move this to the process module
-bool CoreController::killProcess(const QString &fileName)
-{
-/*    logger.debug() << "Terminating:" << fileName;
-
-    // Take a snapshot of all processes in the system.
-    HANDLE snapShot = CreateToolhelp32Snapshot(TH32CS_SNAPALL, NULL);
-    PROCESSENTRY32 pe32;
-
-    auto cleanup = qScopeGuard( [snapShot] {
-        CloseHandle(snapShot);
-    });
-
-    if (snapShot == INVALID_HANDLE_VALUE) {
-        logger.error() << "CreateToolhelp32Snapshot failed for process:" << fileName;
-        return false;
-    }
-
-    // Set the size of the structure before using it.
-    pe32.dwSize = sizeof(PROCESSENTRY32);
-
-    // Retrieve information about the first process,
-    // and exit if unsuccessful
-    BOOL hRes = Process32First(snapShot, &pe32);
-    if (!hRes) {
-        logger.error() << "Process32First failed" << GetLastError();
-        return false;
-    }
-
-    QFileInfo fileExeName(fileName);
-    while (hRes) {
-        if (wcscmp(pe32.szExeFile, fileExeName.fileName().toStdWString().c_str()) == 0) {
-            // Create a handle to the process
-            HANDLE hprocess = OpenProcess(PROCESS_TERMINATE, false, (DWORD)pe32.th32ProcessID);
-
-            if (hprocess != NULL) {
-                BOOL terminated = TerminateProcess(hprocess, 9);
-                if (!terminated) {
-                    logger.error() << "TerminateProcess failed. Error:" << GetLastError();
-                    return false;
-                }
-                logger.debug() << "Terminated process:" << fileName;
-            } else {
-                logger.error() << "Could not create a handle to the process";
-                return false;
-            }
-        } else {
-            logger.debug() << "Process is not running";
-        }
-        hRes = Process32Next(snapShot, &pe32);
-    }*/
-
-    Process::ProcessHandle process = Process::getProcess(fileName.toStdWString());
-    if (process.isEmpty()) {
-        logger.debug() << "Process is not running";
-        return false;
-    }
-
-    Process::closeProcess(process);
-    logger.debug() << "Terminated process:" << fileName;
-
-    return true;
 }

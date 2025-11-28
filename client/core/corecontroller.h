@@ -32,8 +32,6 @@ public slots:
     void onMainProcessNotConnected();
 
 private:
-    bool killProcess(const QString &fileName);
-
     QSharedPointer<HashManager> m_hashManager;
     QSharedPointer<SecurityMonitor> m_securityMonitor;
     DaemonLocalServer* m_daemonServer;

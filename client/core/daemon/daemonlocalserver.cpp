@@ -65,7 +65,7 @@ void DaemonLocalServer::onNewConnection()
 void DaemonLocalServer::onViolationDetected()
 {
     if (!isConnected()) {
-        logger.critical() << "Primary app isn't connected to EagleEye";
+        logger.critical() << "Main app isn't connected to EagleEye";
         // Fallback. If we can't communicate with main process, terminate it.
         emit mainProcessNotConnected();
         return;

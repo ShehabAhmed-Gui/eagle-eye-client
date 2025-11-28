@@ -36,18 +36,17 @@ namespace Process
         HANDLE id = INVALID_HANDLE_VALUE;
 #endif
         // Checks if the process id/handle is invalid
-        bool isEmpty();
+        bool isValid();
     };
 
     void closeProcess(ProcessHandle& process);
+    bool killProcess(const QString &fileName);
 
     // Runs the specified executable (absolute path), returns the handle to its process
     ProcessHandle runProcess(std::wstring exePath);
 
-    // Gets a current running process by its executable path (absolute path)
+    // Gets a current running process by its executable path(absolute path)
     ProcessHandle getProcess(std::wstring exePath);
-
-    ProcessHandle getHandleToProcess(const QString &exePath);
 
     // Gets a current running process by its executable name
     ProcessHandle getProcessByExeName(std::wstring exePath);

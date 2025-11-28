@@ -27,18 +27,18 @@ Logger logger("Process");
 
 namespace Process
 {
-    bool ProcessHandle::isEmpty()
+    bool ProcessHandle::isValid()
     {
 #if defined(_WIN32)
         // Only nullptr is considered empty, pseudo-handle -1 is valid
-        return id == nullptr;
+        return (id != nullptr) || (id != INVALID_HANDLE_VALUE);
 #endif
         return false;
     }
 
     bool hasDebugger(ProcessHandle& process)
     {
-        if (process.isEmpty()) return false;
+        if (!process.isValid()) return false;
 
 #if defined(_WIN32)
         BOOL result = FALSE;
@@ -48,7 +48,7 @@ namespace Process
             return true;
         }
 
-        if (!process.isEmpty()) {
+        if (process.isValid()) {
             // Checks if the process is attached to a debugger
             success = CheckRemoteDebuggerPresent(process.id, &result);
         } else {
@@ -64,7 +64,11 @@ namespace Process
     void closeProcess(ProcessHandle& process)
     {
 #if defined(_WIN32)
-        TerminateProcess(process.id, 0);
+        BOOL terminated = TerminateProcess(process.id, 9);
+        if (!terminated) {
+            logger.error() << "TerminateProcess failed. Error:" << GetLastError();
+            return;
+        }
 #endif
     }
 
@@ -123,40 +127,30 @@ namespace Process
     {
 #if defined(_WIN32)
         HANDLE processSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+
+        auto cleanup = qScopeGuard([&processSnapshot]{
+            CloseHandle(processSnapshot);
+        });
+
         PROCESSENTRY32 processEntry;
         processEntry.dwSize = sizeof(PROCESSENTRY32);
 
+        QFileInfo fileInfo(QString::fromStdWString(exePath));
         if (Process32First(processSnapshot, &processEntry) == TRUE) { 
-           while (Process32Next(processSnapshot, &processEntry) == TRUE)
-           {
-                HANDLE checkedProcessHandle = OpenProcess(PROCESS_QUERY_INFORMATION,
-                                                            FALSE,
-                                                            processEntry.th32ProcessID);
-                if (checkedProcessHandle == nullptr) {
-                    // Normal behavior, we just can't access that process
-                    continue;
-                }
-                
-                wchar_t fullPath[MAX_PATH];
-                DWORD fullPathSize = MAX_PATH;
+           while (Process32Next(processSnapshot, &processEntry) == TRUE) {
+                if (wcscmp(processEntry.szExeFile, fileInfo.fileName().toStdWString().c_str()) == 0) {
+                    // To terminate a process
+                    // we need a handle with at least PROCESS_TERMINATE access rights
+                    HANDLE processHandle = OpenProcess(PROCESS_TERMINATE | PROCESS_QUERY_LIMITED_INFORMATION,
+                                                                FALSE,
+                                                                processEntry.th32ProcessID);
 
-                if (QueryFullProcessImageName(checkedProcessHandle, 0, fullPath, &fullPathSize) == 0) {
-                    //TODO(omar): Log
-                    CloseHandle(checkedProcessHandle);
-                    continue;
-                }
-                std::wstring processExeFile = fullPath;
-
-                CloseHandle(checkedProcessHandle);
-
-                if (processExeFile == exePath) {
                     ProcessHandle process;
-                    process.id = OpenProcess(PROCESS_ALL_ACCESS,
-                                                 FALSE,
-                                                 processEntry.th32ProcessID);
+                    process.id = processHandle;
+
                     return process;
-               }
-           }
+                }
+            }
         }
 #endif
         return ProcessHandle();
@@ -186,28 +180,7 @@ namespace Process
 #endif
         return ProcessHandle();
     }
-    ProcessHandle getHandleToProcess(const QString &exePath)
-    {
-        ProcessHandle process = {};
-        PROCESSENTRY32 entry;
-        entry.dwSize = sizeof(PROCESSENTRY32);
-        HANDLE processSnapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
-        if (processSnapshot == INVALID_HANDLE_VALUE) {
-            logger.critical() << "Could not take a snapshot";
-            return process;
-        }
 
-        if (Process32First(processSnapshot, &entry)) {
-            do {
-                if (QString::fromWCharArray(entry.szExeFile) == exePath) {
-                    process.id = OpenProcess(PROCESS_ALL_ACCESS, FALSE, entry.th32ProcessID);
-                    break;
-                }
-            } while (Process32Next(processSnapshot, &entry));
-        }
-
-        return process;
-    }
     std::vector<std::wstring> getProcessModules(ProcessHandle& process)
     {
 #if defined(_WIN32)
@@ -267,5 +240,25 @@ namespace Process
         return threadIds;
 #endif
         return {};
+    }
+
+    bool killProcess(const QString &fileName)
+    {
+        Process::ProcessHandle process = Process::getProcess(fileName.toStdWString());
+        if (!process.isValid()) {
+            logger.warning() << "Process is not running";
+            return false;
+        }
+
+        BOOL terminated = TerminateProcess(process.id, 9);
+
+        if (!terminated) {
+            logger.error() << "Failed to kill process:" << fileName
+                           << "Error:" << GetLastError();
+            return false;
+        }
+
+        logger.debug() << "Terminated process:" << fileName;
+        return true;
     }
 }
