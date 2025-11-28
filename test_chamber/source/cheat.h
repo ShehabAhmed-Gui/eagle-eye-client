@@ -14,6 +14,8 @@
 #ifndef CHEAT_H
 #define CHEAT_H
 
+#include <string>
+
 namespace EagleEye
 {
     struct Connection
@@ -22,7 +24,7 @@ namespace EagleEye
 private:
     #if defined(_WIN32)
         typedef void* HANDLE;
-        HANDLE pipe;
+        HANDLE pipe; 
     #endif
 
 public:
@@ -37,6 +39,8 @@ public:
 
         // returns true if there is a message waiting to be read by us
         bool Connection::is_message_pending() const;
+
+        std::string Connection::read_message() const;
     };
 
     bool is_anticheat_running();

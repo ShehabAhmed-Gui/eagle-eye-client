@@ -30,6 +30,8 @@ namespace EagleEye
     const std::string pipe_name = R"(\\.\pipe\eagleeye)";
     const std::string app_id = "com.test.TestChamber";
 
+    const int MAX_MSG_SIZE = 1024;
+
     Connection::Connection()
     {
 #if defined(_WIN32)
@@ -105,6 +107,37 @@ namespace EagleEye
 #endif
         
         return false;
+    }
+
+    std::string Connection::read_message() const
+    {
+        if (is_message_pending() == false) {
+            return {};
+        }
+
+#if defined(_WIN32)
+        DWORD bytes_read;
+        char msg[MAX_MSG_SIZE];
+        if (ReadFile(pipe,
+                 msg,
+                 MAX_MSG_SIZE,
+                 &bytes_read,
+                 nullptr) == 0) {
+            std::cout << "ReadFile failed, error: " << GetLastError() << std::endl;
+            return {};
+        }
+
+        for (int i = 0; i < MAX_MSG_SIZE; i++)
+        {
+            if (msg[i] == '\n') {
+                msg[i] = '\0';
+                break;
+            }
+        }
+
+        return std::string(msg);
+#endif
+        return {};
     }
 
     bool Connection::is_message_pending() const
