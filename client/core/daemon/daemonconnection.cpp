@@ -29,7 +29,7 @@ DaemonConnection::DaemonConnection(QSharedPointer<SecurityMonitor> securityMonit
     connected = true;
     connect(socket, &QLocalSocket::readyRead, this, &DaemonConnection::onReadyRead);
     connect(socket, &QLocalSocket::disconnected, this, [=]{
-        logger.debug() << "Primary app's disconnected";
+        logger.debug() << "Main app's disconnected";
         connected = false;
     });
 }
@@ -68,7 +68,6 @@ void DaemonConnection::parseCommand(const QByteArray &command)
 
     if (cmd == "token_request") {
         const QString appId = obj.value("app_id").toString();
-
         if (!compareAppId(appId)) {
             logger.error() << "Received incorrect app id";
             return;
