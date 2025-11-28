@@ -4,17 +4,18 @@
 #endif
 
 #include "cheat.h"
+#include "vendor/json.hpp"
 
 #include <iostream>
 #include <vector>
 #include <cstdlib>
 
-const std::string service_name = "EagleEye";
-const std::string pipe_name = R"(\\.\pipe\eagleeye)";
 
 namespace EagleEye
 {
-
+    const std::string service_name = "EagleEye";
+    const std::string pipe_name = R"(\\.\pipe\eagleeye)";
+    const std::string app_id = "com.test.TestChamber";
 
     Connection::Connection()
     {
@@ -78,14 +79,20 @@ namespace EagleEye
     bool send_token_request(const Connection& connection)
     {
         //Send message
-        std::string msg = R"(
+/*        std::string msg = R"(
             {
             "cmd": "token_request",
             "app_id: "com.test.TestChamber
             }            
-        )";
+        )";*/
+        using nlohmann::json;
 
-        return send_message(connection, msg.data(), msg.size() + 1);
+        json msg;
+        msg["cmd"] = "token_request";
+        msg["app_id"] = app_id;
+        std::string msg_str = msg.dump();
+
+        return send_message(connection, msg_str.data(), msg_str.size() + 1);
     }
 
     bool is_anticheat_running()
