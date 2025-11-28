@@ -54,6 +54,7 @@ void CoreController::onMainProcessNotConnected()
     }
 }
 
+//TODO() move this to the process module
 bool CoreController::killProcess(const QString &fileName)
 {
     logger.debug() << "Terminating:" << fileName;
