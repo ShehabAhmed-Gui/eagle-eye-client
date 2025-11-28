@@ -30,7 +30,9 @@ set(SOURCES source/main.cpp
 set(HEADERS source/gameconst.h
             source/player.h
             source/game.h
-            source/cheat.h)
+            source/cheat.h
+            
+            source/vendor/json.hpp)
 
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 #set(raylib_VERBOSE 1)
