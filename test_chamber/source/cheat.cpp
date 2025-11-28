@@ -23,7 +23,6 @@
 #include <vector>
 #include <cstdlib>
 
-
 namespace EagleEye
 {
     const std::string service_name = "EagleEye service";
@@ -214,7 +213,6 @@ namespace EagleEye
         free(services);
 
         return false;
-
 #endif
         return false;
     }
