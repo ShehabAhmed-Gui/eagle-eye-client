@@ -36,6 +36,8 @@ public:
 private:
     Process::ProcessHandle process;
     std::vector<std::wstring> processModules;
+
+    void lookForProcess();
 };
 
 #endif // PROCESSMONITOR_H

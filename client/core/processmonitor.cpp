@@ -23,9 +23,14 @@ Logger logger("ProcessMonitor");
 
 ProcessMonitor::ProcessMonitor()
 {
+    lookForProcess();
+}
+
+void ProcessMonitor::lookForProcess()
+{
     process = Process::getProcessByExeName(L"TestChamber.exe");
 
-    if (!process.isValid()) {
+    if (process.isValid() == false) {
         logger.error() << "Couldn't find the test chamber process";
     }
     else {
@@ -36,6 +41,11 @@ ProcessMonitor::ProcessMonitor()
 
 ViolationType ProcessMonitor::run()
 {
+    //Look for the process if we haven't found it yet
+    if (process.isValid() == false) {
+        lookForProcess();
+    }
+
     // 1. Check if our service is running
     // in a debugger
     Process::ProcessHandle service_process = {};
@@ -54,11 +64,13 @@ ViolationType ProcessMonitor::run()
         }
     }
 
-    // 3. Check for injected dlls in the main executable
-    std::vector<std::wstring> currentModules = Process::getProcessModules(process);
-    if (currentModules != processModules)
-    {
-        return ViolationType::DLLInjectionViolation;
+    if (process.isValid()) {
+        // 3. Check for injected dlls in the main executable
+        std::vector<std::wstring> currentModules = Process::getProcessModules(process);
+        if (currentModules != processModules)
+        {
+            return ViolationType::DLLInjectionViolation;
+        }
     }
 
     return ViolationType::NoViolation;
