@@ -33,7 +33,7 @@ namespace EagleEye
     Connection::Connection()
     {
 #if defined(_WIN32)
-        pipe = INVALID_HANDLE_VALUE;
+        pipe = nullptr;
 #endif
     }
 
@@ -81,7 +81,7 @@ namespace EagleEye
     bool Connection::is_empty() const
     {
 #if defined(_WIN32)
-        return pipe == INVALID_HANDLE_VALUE;
+        return (pipe == INVALID_HANDLE_VALUE) || (pipe == nullptr);
 #endif
     }
 
