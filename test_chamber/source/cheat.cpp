@@ -53,12 +53,13 @@ namespace EagleEye
         return connection;
     }
 
-    void send_token_request(const Connection& connection)
+    bool send_token_request(const Connection& connection)
     {
         if (connection.is_empty()) {
-            return;
+            return false;
         }
 
+#if defined(_WIN32)
         //Send message
         DWORD bytes_written;
         std::string msg = R"(
@@ -73,9 +74,14 @@ namespace EagleEye
                 msg.size() + 1,
                 &bytes_written,
                 nullptr);
+        
+//        std::cout << "WriteFile returned: " << code << ", Last error: " << GetLastError() << std::endl;
+//        std::cout << "Bytes written: " << bytes_written << std::endl;
 
-        std::cout << "WriteFile returned: " << code << ", Last error: " << GetLastError() << std::endl;
-        std::cout << "Bytes written: " << bytes_written << std::endl;
+        return code != 0;
+#endif
+        
+        return false;
     }
 
     bool is_anticheat_running()

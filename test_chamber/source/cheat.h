@@ -15,7 +15,7 @@ namespace EagleEye
     };
 
     Connection create_connection();
-    void send_token_request(const Connection& connection);
+    bool send_token_request(const Connection& connection);
 
     bool is_anticheat_running();
 }
