@@ -20,7 +20,23 @@ namespace EagleEye
     Connection::Connection()
     {
 #if defined(_WIN32)
-        pipe = INVALID_HANDLE_VALUE;
+        pipe = CreateFileA(pipe_name.data(),
+                                GENERIC_ALL,
+                                FILE_SHARE_READ | FILE_SHARE_WRITE,
+                                nullptr,
+                                OPEN_EXISTING,
+                                FILE_ATTRIBUTE_NORMAL,
+                                nullptr);
+        if (pipe == INVALID_HANDLE_VALUE) {
+            std::cout << "EAGLE-EYE Connection: Opening pipe failed. Error: " << GetLastError() << std::endl;
+        }
+#endif
+    }
+
+    Connection::~Connection()
+    {
+#if defined(_WIN32)
+        CloseHandle(pipe);
 #endif
     }
 
@@ -31,32 +47,9 @@ namespace EagleEye
 #endif
     }
 
-    Connection create_connection()
+    bool Connection::send_message(const char* msg, int msg_size) const
     {
-        Connection connection = Connection();
-
-#if defined(_WIN32)
-        HANDLE pipe = CreateFileA(pipe_name.data(),
-                                GENERIC_ALL,
-                                FILE_SHARE_READ | FILE_SHARE_WRITE,
-                                nullptr,
-                                OPEN_EXISTING,
-                                FILE_ATTRIBUTE_NORMAL,
-                                nullptr);
-        if (pipe == INVALID_HANDLE_VALUE) {
-            std::cout << "EAGLE-EYE Connection: Opening pipe failed. Error: " << GetLastError() << std::endl;
-        }
-        else {
-            connection.pipe = pipe;
-        }
-#endif
-
-        return connection;
-    }
-
-    bool send_message(const Connection& connection, const char* msg, int msg_size)
-    {
-        if (connection.is_empty()) {
+        if (is_empty()) {
             return false;
         }
 
@@ -64,7 +57,7 @@ namespace EagleEye
         //Send message
         DWORD bytes_written;
 
-        int code = WriteFile(connection.pipe,
+        int code = WriteFile(pipe,
                 msg,
                 msg_size,
                 &bytes_written,
@@ -76,15 +69,8 @@ namespace EagleEye
         return false;
     }
 
-    bool send_token_request(const Connection& connection)
+    bool Connection::send_token_request() const
     {
-        //Send message
-/*        std::string msg = R"(
-            {
-            "cmd": "token_request",
-            "app_id: "com.test.TestChamber
-            }            
-        )";*/
         using nlohmann::json;
 
         json msg;
@@ -92,7 +78,7 @@ namespace EagleEye
         msg["app_id"] = app_id;
         std::string msg_str = msg.dump();
 
-        return send_message(connection, msg_str.data(), msg_str.size() + 1);
+        return send_message(msg_str.data(), msg_str.size() + 1);
     }
 
     bool is_anticheat_running()
