@@ -43,6 +43,13 @@ void Game::loop()
 {
     while (WindowShouldClose() == false)
     {
+        if (ac_connection.is_empty()) {
+            ac_connection.connect(); //try connecting
+        }
+        std::string msg = ac_connection.read_message();
+        if (msg.empty() == false) {
+            std::cout << msg << std::endl;
+        }
         update();
         draw();
     }
