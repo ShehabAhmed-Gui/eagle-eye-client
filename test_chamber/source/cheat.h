@@ -16,6 +16,7 @@ public:
         Connection();
         ~Connection();
 
+        void connect();
         bool is_empty() const;
         bool send_token_request() const;
         bool send_message(const char* msg, int msg_size) const;

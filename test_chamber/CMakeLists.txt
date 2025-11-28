@@ -26,11 +26,13 @@ endif()
 set(SOURCES source/main.cpp
             source/player.cpp
             source/game.cpp
-            source/cheat.cpp)
+            source/cheat.cpp
+            source/game_map.cpp)
 set(HEADERS source/gameconst.h
             source/player.h
             source/game.h
             source/cheat.h
+            source/game_map.h
             
             source/vendor/json.hpp)
 

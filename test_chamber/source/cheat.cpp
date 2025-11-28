@@ -20,6 +20,20 @@ namespace EagleEye
     Connection::Connection()
     {
 #if defined(_WIN32)
+        pipe = INVALID_HANDLE_VALUE;
+#endif
+    }
+
+    Connection::~Connection()
+    {
+#if defined(_WIN32)
+        CloseHandle(pipe);
+#endif
+    }
+
+    void Connection::connect()
+    {
+#if defined(_WIN32)
         pipe = CreateFileA(pipe_name.data(),
                                 GENERIC_ALL,
                                 FILE_SHARE_READ | FILE_SHARE_WRITE,
@@ -30,13 +44,6 @@ namespace EagleEye
         if (pipe == INVALID_HANDLE_VALUE) {
             std::cout << "EAGLE-EYE Connection: Opening pipe failed. Error: " << GetLastError() << std::endl;
         }
-#endif
-    }
-
-    Connection::~Connection()
-    {
-#if defined(_WIN32)
-        CloseHandle(pipe);
 #endif
     }
 

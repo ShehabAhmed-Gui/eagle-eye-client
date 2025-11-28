@@ -1,23 +1,35 @@
 #ifndef GAME_H
 #define GAME_H
 
+#include "cheat.h"
+#include "game_map.h"
+#include "player.h"
+
+#include <raylib.h>
+
 #include <string>
 
-struct GameMap
+
+class Game
 {
-    int* tiles;
-    int w;
-    int h;
+private:
+    EagleEye::Connection ac_connection;
 
-    GameMap(int w, int h);
-    ~GameMap();
-    int GameMap::get_tile(int x, int y);
-    bool GameMap::set_tile(int x, int y, int id);
+    void init_anticheat();
+public:
+    GameMap map;
 
-    void load_from_file(const std::string path);
+    Texture2D background;
+    Player player;
+
+    Game();
+    ~Game();
+
+    void loop();
+
+    void update();
+    void draw();
+    void draw_map();
 };
-
-void game_loop();
-void draw_map(GameMap& map);
 
 #endif

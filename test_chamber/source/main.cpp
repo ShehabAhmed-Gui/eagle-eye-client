@@ -23,19 +23,10 @@ int main(void)
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "TestChamber");
     SetTargetFPS(TARGET_FPS);
 
-    if (EagleEye::is_anticheat_running()) {
-        std::cout << "INFO: Anticheat service is running.\n";
+    Game* game = new Game();
+    game->loop();
 
-        EagleEye::Connection connection = EagleEye::Connection();
-        if (connection.send_token_request() == true) {
-            std::cout << "INFO: Sent token request to anticheat service.\n";
-        }
-    }
-    else {
-        std::cout << "INFO: Anticheat service is NOT running.\n";
-    }
-    game_loop();
-
+    delete game;
     CloseWindow();
 
     return 0;

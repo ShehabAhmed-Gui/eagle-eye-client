@@ -138,9 +138,11 @@ void Player::collide(GameMap& map, Vector2 velocity)
         }
     }
 
-    for (int tile_y = 0; tile_y < map.h; tile_y++)
+    int map_w = map.width();
+    int map_h = map.height();
+    for (int tile_y = 0; tile_y < map_h; tile_y++)
     {
-        for (int tile_x = 0; tile_x < map.w; tile_x++)
+        for (int tile_x = 0; tile_x < map_w; tile_x++)
         {
             Rectangle rect = {x, y, w, h};
 

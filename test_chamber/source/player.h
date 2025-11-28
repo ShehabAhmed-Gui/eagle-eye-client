@@ -16,7 +16,7 @@
 
 #include <raylib.h>
 
-#include "game.h"
+struct GameMap;
 
 struct Player
 {
