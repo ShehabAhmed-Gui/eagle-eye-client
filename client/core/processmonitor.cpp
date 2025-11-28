@@ -38,9 +38,9 @@ ViolationType ProcessMonitor::run()
 {
     // 1. Check if our service is running
     // in a debugger
-    Process::ProcessHandle process = {};
-    process.id = GetCurrentProcess();
-    if (Process::hasDebugger(process)) {
+    Process::ProcessHandle service_process = {};
+    service_process.id = GetCurrentProcess();
+    if (Process::hasDebugger(service_process)) {
         return ViolationType::EagleEyeRunningInADebugger;
     }
 
@@ -54,7 +54,7 @@ ViolationType ProcessMonitor::run()
         }
     }
 
-    // 3. Check for injected dlls
+    // 3. Check for injected dlls in the main executable
     std::vector<std::wstring> currentModules = Process::getProcessModules(process);
     if (currentModules != processModules)
     {
