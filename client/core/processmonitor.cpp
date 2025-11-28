@@ -48,7 +48,7 @@ ViolationType ProcessMonitor::run()
     // of the the main app is running in a debugger
     for (const QString &file : FilesManager::getExeFiles(Utils::getMainAppLocation())) {
         // Get a handle to the process
-        process = Process::getHandleToProcess(file);
+        Process::ProcessHandle process = Process::getProcess(file.toStdWString());
         if (Process::hasDebugger(process)) {
             return ViolationType::DebuggerViolation;
         }
