@@ -33,7 +33,7 @@ namespace Process
     struct ProcessHandle
     {
 #if defined(_WIN32)
-        HANDLE id = INVALID_HANDLE_VALUE;
+        HANDLE id = nullptr;
 #endif
         // Checks if the process id/handle is invalid
         bool isValid();
