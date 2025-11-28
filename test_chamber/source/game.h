@@ -25,11 +25,19 @@
 
 class Game
 {
+    enum GameState
+    {
+        PLAY,
+        BANNED
+    };
+
 private:
+    GameState state;
     EagleEye::Connection ac_connection;
 
     void init_anticheat();
     void handle_anticheat_message(std::string msg);
+    void on_violation(std::string details);
 public:
     GameMap map;
 
@@ -43,6 +51,7 @@ public:
 
     void update();
     void draw();
+    void draw_centered_text(const char* text, float y_factor, int font_size, Color color);
     void draw_map();
 };
 

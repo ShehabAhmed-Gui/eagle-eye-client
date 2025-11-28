@@ -25,6 +25,7 @@
 
 Game::Game()
 {
+    state = GameState::PLAY;
     init_anticheat();
 
     map.init(WINDOW_WIDTH / TILE_SIZE.x, WINDOW_HEIGHT / TILE_SIZE.y);
@@ -60,23 +61,66 @@ void Game::loop()
 
 void Game::update()
 {
-    player.update(map);
+    switch (state)
+    {
+        case PLAY:
+        {
+            player.update(map);
+        } break;
+
+        case BANNED:
+        {
+
+        } break;
+    }
 }
 
 void Game::draw()
 {
-    Rectangle background_source = {0, 0, background.width, background.height};
-    Rectangle background_dest = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
-
     BeginDrawing();
-    ClearBackground(BACKGROUND_COLOR);
-    DrawTexturePro(background, background_source, background_dest, {0, 0}, 0, WHITE);
 
-    draw_map();
+    switch (state)
+    {
+        case PLAY:
+        {
+            Rectangle background_source = {0, 0, background.width, background.height};
+            Rectangle background_dest = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 
-    player.draw();
+            ClearBackground(BACKGROUND_COLOR);
+            DrawTexturePro(background, background_source, background_dest, {0, 0}, 0, WHITE);
+
+            draw_map();
+
+            player.draw();
+        } break;
+
+        case BANNED:
+        {
+            ClearBackground(BLACK);
+
+            Color color = {200, 20, 20, 255};
+            draw_centered_text("Violation Detected", 0.25f, 48, color);
+
+            draw_centered_text("An Anticheat Violation has been detected in your game. Therefore you have been locked out temporarily.", 0.5f, 24, color);
+        } break;
+    }
+
 
     EndDrawing();
+}
+
+void Game::draw_centered_text(const char* text, float y_factor, int font_size, Color color)
+{
+    int text_width = MeasureText(text, font_size);
+    int screen_width = GetScreenWidth();
+    int screen_height = GetScreenHeight();
+
+    // Calculate centered position
+    int x = (screen_width - text_width) / 2;
+    int y = (screen_height - font_size) * y_factor;
+
+    // Draw centered text
+    DrawText(text, x, y, font_size, color); 
 }
 
 void Game::init_anticheat()
@@ -103,9 +147,15 @@ void Game::handle_anticheat_message(std::string msg)
 
     if (json_object.is_object()) {
         if (json_object["status"] == "violation") {
-            std::cout << "A violation has been detected, details: " << json_object["details"] << std::endl;
+            on_violation(json_object["details"]);
         }
     }
+}
+
+void Game::on_violation(std::string details)
+{
+    std::cout << "A violation has been detected, details: " << details << std::endl;
+    state = GameState::BANNED;
 }
 
 void Game::draw_map()
