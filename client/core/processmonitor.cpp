@@ -25,7 +25,7 @@ ProcessMonitor::ProcessMonitor()
 {
     process = Process::getProcessByExeName(L"TestChamber.exe");
 
-    if (process.isEmpty()) {
+    if (!process.isValid()) {
         logger.error() << "Couldn't find the test chamber process";
     }
     else {
