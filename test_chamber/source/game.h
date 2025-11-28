@@ -52,6 +52,9 @@ public:
     void draw();
     void draw_centered_text(const char* text, float y_factor, int font_size, Color color);
     void draw_map();
+
+private:
+    std::string m_details;
 };
 
 #endif

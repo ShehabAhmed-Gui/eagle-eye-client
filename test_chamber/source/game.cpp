@@ -101,7 +101,7 @@ void Game::draw()
             Color color = {200, 20, 20, 255};
             draw_centered_text("Violation Detected", 0.25f, 48, color);
 
-            draw_centered_text("We detected an anti-cheat violation during gameplay.\nYour access has been temporarily suspended for security reasons.", 0.5f, 24, color);
+            draw_centered_text(m_details.c_str(), 0.5f, 24, color);
         } break;
     }
 
@@ -129,7 +129,7 @@ void Game::init_anticheat()
 
     if (!EagleEye::is_anticheat_running()) {
         std::cout << "INFO: Anticheat service is NOT running.\n";
-        on_violation("Anti-cheat service isn't running");
+        on_violation("Anti-cheat service is not running");
         return;
     }
 
@@ -165,6 +165,7 @@ void Game::handle_anticheat_message(std::string msg)
 void Game::on_violation(std::string details)
 {
     std::cout << "A violation has been detected, details: " << details << std::endl;
+    m_details = details;
     state = GameState::BANNED;
 }
 
