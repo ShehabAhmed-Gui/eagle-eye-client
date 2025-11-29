@@ -92,10 +92,9 @@ ViolationType ProcessMonitor::run()
     }
 
     // 2. Go through every executable we monitor
-    // check if its running as a process 
+    // check if its running as a process
     // and perform monitor checks on it
-    for (ProcessInfo& process : processes)
-    {
+    for (ProcessInfo& process : processes) {
         ProcessHandle processHandle = lookForProcess(process);
         if (processHandle.isValid() == false) {
             continue;
@@ -110,8 +109,7 @@ ViolationType ProcessMonitor::run()
         // Check for malicious DLL injection
         std::vector<std::wstring> currentModules = std::vector<std::wstring>(getProcessModules(processHandle));
         logger.debug() << currentModules.size();
-        for (const std::wstring &modulePath : currentModules)
-        {
+        for (const std::wstring &modulePath : currentModules) {
             if (isModuleVerified(process, modulePath) == false) {
                 return ViolationType::DLLInjectionViolation;
             }
