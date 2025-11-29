@@ -38,6 +38,7 @@ private:
     std::vector<std::wstring> processModules;
 
     void lookForProcess();
+    bool isModuleVerified(const std::wstring modulePath);
 };
 
 #endif // PROCESSMONITOR_H
