@@ -37,7 +37,8 @@ private:
 
     struct ProcessInfo
     {
-        std::wstring exePath; // ABSOLUTE path of the executable
+        // Absolute path to the executable
+        std::wstring exePath;
         std::vector<std::wstring> startupModules;
     };
 
