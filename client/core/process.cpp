@@ -23,6 +23,7 @@ Logger logger("Process");
 #include <tlhelp32.h>
 #include <tchar.h>
 #include <psapi.h>
+#include <softpub.h>
 #endif
 
 namespace Process
@@ -260,5 +261,38 @@ namespace Process
 
         logger.debug() << "Terminated process:" << fileName;
         return true;
+    }
+
+    bool isFileSigned(const std::wstring path)
+    {
+#if defined(_WIN32) 
+        WINTRUST_FILE_INFO file_info = {0};
+        file_info.cbStruct = sizeof(WINTRUST_FILE_INFO);
+        file_info.pcwszFilePath = path.c_str();
+        file_info.hFile = nullptr;
+        file_info.pgKnownSubject = nullptr;
+
+        WINTRUST_DATA wintrust_data = {0};
+        wintrust_data.cbStruct = sizeof(WINTRUST_DATA);
+        wintrust_data.dwUIChoice = WTD_UI_NONE;
+        wintrust_data.fdwRevocationChecks = WTD_REVOKE_NONE;
+        wintrust_data.dwUnionChoice = WTD_CHOICE_FILE;
+        wintrust_data.pFile = &file_info;
+        wintrust_data.dwStateAction = WTD_STATEACTION_VERIFY;
+
+        GUID guid = WINTRUST_ACTION_GENERIC_VERIFY_V2;
+
+        LONG trust = WinVerifyTrust((HWND)INVALID_HANDLE_VALUE,
+                    &guid,
+                    &wintrust_data);
+
+        wintrust_data.dwStateAction = WTD_STATEACTION_CLOSE;
+        WinVerifyTrust((HWND)INVALID_HANDLE_VALUE,
+                    &guid,
+                    &wintrust_data);
+        
+        return trust == 0;
+#endif
+        return false;
     }
 }

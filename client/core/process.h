@@ -62,6 +62,9 @@ namespace Process
     std::vector<uint64_t> getProcessThreads(ProcessHandle& process);
 
     bool hasDebugger(ProcessHandle& process);
+
+    // Check if the file has a valid digital signature
+    bool isFileSigned(const std::wstring path);
 }
 
 #endif

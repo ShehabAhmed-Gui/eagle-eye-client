@@ -38,9 +38,9 @@ private:
     void init_anticheat();
     void handle_anticheat_message(std::string msg);
     void on_violation(std::string details);
+
 public:
     GameMap map;
-
     Texture2D background;
     Player player;
 
@@ -48,11 +48,13 @@ public:
     ~Game();
 
     void loop();
-
     void update();
     void draw();
     void draw_centered_text(const char* text, float y_factor, int font_size, Color color);
     void draw_map();
+
+private:
+    std::string m_violation_details;
 };
 
 #endif
