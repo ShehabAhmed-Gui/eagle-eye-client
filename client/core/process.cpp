@@ -220,7 +220,7 @@ namespace Process
         threadEntry.dwSize = sizeof(THREADENTRY32);
 
         if (Thread32First(threadSnapshot, &threadEntry) == FALSE) {
-            // TODO(omar): Log
+            logger.error() << "Thread32First failed";
             CloseHandle(threadSnapshot);
             return {};
         }
