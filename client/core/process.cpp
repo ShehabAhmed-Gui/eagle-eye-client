@@ -146,7 +146,6 @@ namespace Process
 
                     ProcessHandle process;
                     process.id = processHandle;
-
                     return process;
                 }
             }
