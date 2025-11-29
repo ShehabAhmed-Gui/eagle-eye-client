@@ -54,7 +54,7 @@ public:
     void draw_map();
 
 private:
-    std::string m_details;
+    std::string m_violation_details;
 };
 
 #endif

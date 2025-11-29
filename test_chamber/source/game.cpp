@@ -101,7 +101,7 @@ void Game::draw()
             Color color = {200, 20, 20, 255};
             draw_centered_text("Violation Detected", 0.25f, 48, color);
 
-            draw_centered_text(m_details.c_str(), 0.5f, 24, color);
+            draw_centered_text(m_violation_details.c_str(), 0.5f, 24, color);
         } break;
     }
 
@@ -168,7 +168,7 @@ void Game::handle_anticheat_message(std::string msg)
 void Game::on_violation(std::string details)
 {
     std::cout << "A violation has been detected, details: " << details << std::endl;
-    m_details = details;
+    m_violation_details = details;
     state = GameState::BANNED;
 }
 
