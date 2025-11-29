@@ -39,6 +39,31 @@ void ProcessMonitor::lookForProcess()
     }
 }
 
+bool ProcessMonitor::isModuleVerified(const std::wstring modulePath)
+{
+    // Check if its the process executable
+    std::wstring processPath = Process::getProcessPath(process);
+    if (modulePath == processPath) {
+        return true;
+    }
+
+    // Check if its part of the startup modules, which we deem as verified
+    for (std::wstring startupModule : processModules)
+    {
+        if (modulePath == startupModule) {
+            return true;
+        }
+    }
+
+    // Check if it has a valid digital signature
+    if (Process::isFileSigned(modulePath)) {
+        return true;
+    }
+
+    logger.warning() << "Unverified DLL: " << modulePath;
+    return false;
+}
+
 ViolationType ProcessMonitor::run()
 {
     //Look for the process if we haven't found it yet
@@ -66,10 +91,15 @@ ViolationType ProcessMonitor::run()
 
     if (process.isValid()) {
         // 3. Check for injected dlls in the main executable
+
+        // Check for unverified DLLs
         std::vector<std::wstring> currentModules = Process::getProcessModules(process);
-        if (currentModules != processModules)
+
+        for (std::wstring modulePath : currentModules)
         {
-            return ViolationType::DLLInjectionViolation;
+            if (isModuleVerified(modulePath) == false) {
+                return ViolationType::DLLInjectionViolation;
+            }
         }
     }
 
