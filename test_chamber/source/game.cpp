@@ -146,6 +146,9 @@ void Game::handle_anticheat_message(std::string msg)
     using nlohmann::json;
     json json_object = json::parse(msg);
 
+    const std::string violationMessage = "We detected an anti-cheat violation.\n"
+                                         "Your access is suspended for security reasons.";
+
     if (json_object.is_object()) {
         // 1. Handle token request reply
         if (json_object["allowed"] == false) {
