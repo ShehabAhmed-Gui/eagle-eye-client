@@ -55,8 +55,8 @@ namespace EagleEye
                                 FILE_ATTRIBUTE_NORMAL,
                                 nullptr);
         if (pipe == INVALID_HANDLE_VALUE) {
-            std::cout << "Connecting to EagleEye pipe failed with error: "
-                      << GetLastError() << std::endl;
+/*            std::cout << "Connecting to EagleEye pipe failed with error: "
+                      << GetLastError() << std::endl;*/
             return false;
         }
 
