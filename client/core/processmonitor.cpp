@@ -29,7 +29,7 @@ ProcessMonitor::ProcessMonitor()
 {
     QVector<QString> exePaths = FilesManager::getExeFiles(Utils::getMainAppLocation());
 
-    for (QString exePath : exePaths)
+    for (QString exePath : std::as_const(exePaths))
     {
         ProcessInfo info;
         info.exePath = exePath.toStdWString();
@@ -65,7 +65,7 @@ bool ProcessMonitor::isModuleVerified(const ProcessInfo& process, const std::wst
     }
 
     // Check if its part of the startup modules, which we deem as verified
-    for (std::wstring startupModule : process.startupModules)
+    for (const std::wstring &startupModule : process.startupModules)
     {
         if (modulePath == startupModule) {
             return true;
@@ -110,7 +110,7 @@ ViolationType ProcessMonitor::run()
         // Check for malicious DLL injection
         std::vector<std::wstring> currentModules = std::vector<std::wstring>(getProcessModules(processHandle));
         logger.debug() << currentModules.size();
-        for (std::wstring modulePath : currentModules)
+        for (const std::wstring &modulePath : currentModules)
         {
             if (isModuleVerified(process, modulePath) == false) {
                 return ViolationType::DLLInjectionViolation;
