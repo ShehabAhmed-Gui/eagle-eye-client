@@ -46,7 +46,7 @@ void Game::loop()
     while (WindowShouldClose() == false)
     {
         if (ac_connection.is_empty()) {
-            ac_connection.connect(); //try connecting
+            ac_connection.connect();
         }
 
         std::string msg = ac_connection.read_message();
@@ -83,7 +83,7 @@ void Game::draw()
     {
         case PLAY:
         {
-            Rectangle background_source = {0, 0, background.width, background.height};
+            Rectangle background_source = {0, 0, static_cast<float>(background.width), static_cast<float>(background.height)};
             Rectangle background_dest = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 
             ClearBackground(BACKGROUND_COLOR);
@@ -101,7 +101,7 @@ void Game::draw()
             Color color = {200, 20, 20, 255};
             draw_centered_text("Violation Detected", 0.25f, 48, color);
 
-            draw_centered_text("We detected an anti-cheat violation during gameplay.\nYour access has been temporarily suspended for security reasons.", 0.5f, 24, color);
+            draw_centered_text(m_details.c_str(), 0.5f, 24, color);
         } break;
     }
 
@@ -127,16 +127,17 @@ void Game::init_anticheat()
 {
     ac_connection = EagleEye::Connection();
 
-    if (EagleEye::is_anticheat_running()) {
-        std::cout << "INFO: Anticheat service is running.\n";
-
-        ac_connection.connect();
-        if (ac_connection.send_token_request() == true) {
-            std::cout << "INFO: Sent token request to anticheat service.\n";
-        }
-    }
-    else {
+    if (!EagleEye::is_anticheat_running()) {
         std::cout << "INFO: Anticheat service is NOT running.\n";
+        on_violation("Anti-cheat service is not running");
+        return;
+    }
+
+    std::cout << "INFO: Anticheat service is running.\n";
+
+    ac_connection.connect();
+    if (ac_connection.send_token_request() == true) {
+        std::cout << "INFO: Sent token request to anticheat service.\n";
     }
 }
 
@@ -144,6 +145,9 @@ void Game::handle_anticheat_message(std::string msg)
 {
     using nlohmann::json;
     json json_object = json::parse(msg);
+
+    const std::string violationMessage = "We detected an anti-cheat violation.\n"
+                                         "Your access is suspended for security reasons.";
 
     if (json_object.is_object()) {
         // 1. Handle token request reply
@@ -164,6 +168,7 @@ void Game::handle_anticheat_message(std::string msg)
 void Game::on_violation(std::string details)
 {
     std::cout << "A violation has been detected, details: " << details << std::endl;
+    m_details = details;
     state = GameState::BANNED;
 }
 

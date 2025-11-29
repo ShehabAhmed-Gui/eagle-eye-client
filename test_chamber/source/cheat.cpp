@@ -20,9 +20,7 @@
 #include "vendor/json.hpp"
 
 #include <iostream>
-#include <vector>
 #include <cstdlib>
-
 
 namespace EagleEye
 {
@@ -57,27 +55,13 @@ namespace EagleEye
                                 FILE_ATTRIBUTE_NORMAL,
                                 nullptr);
         if (pipe == INVALID_HANDLE_VALUE) {
-            std::cout << "EAGLE-EYE Connection: Opening pipe failed. Error: " << GetLastError() << std::endl;
+            std::cout << "Connecting to EagleEye pipe failed with error: "
+                      << GetLastError() << std::endl;
             return false;
         }
 
         std::cout << "Connected to EagleEye's pipe" << std::endl;
-        
         return true;
-/*        else {
-            DWORD flags;
-            if (GetNamedPipeInfo(pipe, &flags, 0, 0, 0) == 0) {
-                std::cout << "GetNamedPipeInfo failed, code: " << GetLastError() << std::endl;
-                return;
-            }
-
-            if (flags & PIPE_TYPE_BYTE) {
-                std::cout << "Byte type" << std::endl;
-            }
-            else if (flags & PIPE_TYPE_MESSAGE) {
-                std::cout << "Message type" << std::endl;
-            }
-        }*/
 #endif
         return false;
     }
@@ -98,7 +82,7 @@ namespace EagleEye
         std::cout << "Sending message: " << msg << std::endl;
 
 #if defined(_WIN32)
-        //Send message
+        // Send message
         DWORD bytes_written;
 
         int code = WriteFile(pipe,
@@ -127,7 +111,8 @@ namespace EagleEye
                  MAX_MSG_SIZE,
                  &bytes_read,
                  nullptr) == 0) {
-            std::cout << "ReadFile failed, error: " << GetLastError() << std::endl;
+            std::cout << "ReadFile failed with error: "
+                      << GetLastError() << std::endl;
             return {};
         }
 
@@ -183,19 +168,18 @@ namespace EagleEye
         SC_HANDLE service_manager = OpenSCManagerA(nullptr, nullptr, SC_MANAGER_ENUMERATE_SERVICE);
 
         if (service_manager == nullptr) {
-            std::cout << "EAGLE-EYE: OpenSCManager Failed with code: " << GetLastError() << std::endl;
+            std::cout << "OpenSCManager Failed with code: "
+                      << GetLastError() << std::endl;
             return false;
         }
 
-        // TODO(omar): The SERVICE_ACTIVE flag includes paused/pause pending etc services
-        // think about if this could be a problem for us
-
-        DWORD bytes_needed;
+        DWORD bytes_needed = NULL;
         DWORD service_count;
-        //First call to get the required size of the array 
+
+        // First call to get the required size of the array
         EnumServicesStatusA(service_manager,
                         SERVICE_WIN32,
-                        SERVICE_ACTIVE,  
+                        SERVICE_ACTIVE,
                         NULL,            
                         0,
                         &bytes_needed,
@@ -204,7 +188,7 @@ namespace EagleEye
 
         ENUM_SERVICE_STATUSA* services = (ENUM_SERVICE_STATUSA*)calloc(1, bytes_needed);
 
-        //Second call to get the services status
+        // Second call to get the services status
         EnumServicesStatusA(service_manager,
                         SERVICE_WIN32,
                         SERVICE_ACTIVE,  
@@ -217,6 +201,12 @@ namespace EagleEye
         for (int i = 0; i < service_count; i++)
         {
             if (service_name == services[i].lpServiceName) {
+                if (services[i].ServiceStatus.dwCurrentState == SERVICE_STOPPED) {
+                    CloseServiceHandle(service_manager);
+                    free(services);
+                    return false;
+                }
+
                 CloseServiceHandle(service_manager);
                 free(services);
 
@@ -228,9 +218,7 @@ namespace EagleEye
         free(services);
 
         return false;
-
 #endif
-
         return false;
     }
 }
