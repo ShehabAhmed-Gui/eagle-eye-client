@@ -54,6 +54,10 @@ qt_add_executable(${PROJECT}
     ${HEADERS}
 )
 
+if (WIN32)
+    target_link_libraries(${PROJECT} PRIVATE Wintrust Crypt32)
+endif()
+
 target_link_libraries(${PROJECT} PRIVATE
     Qt6::Core
     Qt6::Widgets
