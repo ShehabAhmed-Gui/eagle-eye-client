@@ -41,7 +41,7 @@ void ProcessMonitor::lookForProcess()
 
 ViolationType ProcessMonitor::run()
 {
-    //Look for the process if we haven't found it yet
+    // Look for the process if we haven't found it yet
     if (process.isValid() == false) {
         lookForProcess();
     }
