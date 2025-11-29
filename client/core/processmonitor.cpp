@@ -60,7 +60,7 @@ bool ProcessMonitor::isModuleVerified(const std::wstring modulePath)
         return true;
     }
 
-    logger.debug() << "Unverified DLL: " << modulePath;
+    logger.warning() << "Unverified DLL: " << modulePath;
     return false;
 }
 
