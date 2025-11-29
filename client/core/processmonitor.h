@@ -23,7 +23,7 @@
 #include "defs.h"
 #include "process.h"
 
-using ViolationType = eagle_eye::ViolationType;
+using eagle_eye::ViolationType;
 
 class ProcessMonitor
 {
@@ -34,7 +34,6 @@ public:
     ViolationType run();
 
 private:
-
     struct ProcessInfo
     {
         // Absolute path to the executable

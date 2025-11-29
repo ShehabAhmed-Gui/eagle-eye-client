@@ -45,7 +45,8 @@ ProcessHandle ProcessMonitor::lookForProcess(ProcessInfo& info)
     ProcessHandle processHandle = Process::getProcess(info.exePath);
 
     if (processHandle.isValid()) {
-        if (info.startupModules.empty()) { // Make sure to not overwrite the startup modules
+        // Make sure to not overwrite the startup modules
+        if (info.startupModules.empty()) {
             info.startupModules = std::vector<std::wstring>(getProcessModules(processHandle));
         }
     }
