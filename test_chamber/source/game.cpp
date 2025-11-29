@@ -83,7 +83,7 @@ void Game::draw()
     {
         case PLAY:
         {
-            Rectangle background_source = {0, 0, background.width, background.height};
+            Rectangle background_source = {0, 0, static_cast<float>(background.width), static_cast<float>(background.height)};
             Rectangle background_dest = {0, 0, WINDOW_WIDTH, WINDOW_HEIGHT};
 
             ClearBackground(BACKGROUND_COLOR);
