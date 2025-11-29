@@ -34,11 +34,21 @@ public:
     ViolationType run();
 
 private:
-    Process::ProcessHandle process;
-    std::vector<std::wstring> processModules;
 
-    void lookForProcess();
-    bool isModuleVerified(const std::wstring modulePath);
+    struct ProcessInfo
+    {
+        std::wstring exePath; // ABSOLUTE path of the executable
+        std::vector<std::wstring> startupModules;
+    };
+
+    // Info about the processes we monitor
+    std::vector<ProcessInfo> processes;
+
+    // Checks if the process is running
+    // Updates ProcessInfo accordingly and returns a handle to the process
+    Process::ProcessHandle lookForProcess(ProcessInfo& process);
+    bool isModuleVerified(const ProcessInfo& process, const std::wstring modulePath);
+
 };
 
 #endif // PROCESSMONITOR_H
