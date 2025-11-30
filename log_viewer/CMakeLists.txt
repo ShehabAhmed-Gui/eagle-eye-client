@@ -15,7 +15,9 @@ file(GLOB IMGUI_SRC
      "vendor/imgui/*.cpp"
 )
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${IMGUI_SRC})
+enable_language(RC) # Enable resource compiler
+
+add_executable(${PROJECT_NAME} ${SOURCES} ${IMGUI_SRC} icon.rc)
 
 # Find SDL3 package
 find_package(SDL3 REQUIRED)
