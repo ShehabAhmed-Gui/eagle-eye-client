@@ -80,7 +80,7 @@ namespace Process
     std::vector<uint64_t> getProcessThreads(ProcessHandle& process);
 
     // Gets all open handles to the process that exist on the system
-    std::vector<HandleInfo> getHandles(ProcessHandle& process);
+    std::vector<HandleInfo> getHandles(const ProcessHandle& process);
 
     bool hasDebugger(ProcessHandle& process);
 

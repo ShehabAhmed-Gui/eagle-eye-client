@@ -101,6 +101,11 @@ void SecurityMonitor::onViolationDetected(eagle_eye::ViolationType type)
         m_violationDetails = details;
         logger.critical() << details;
         break;
+    case eagle_eye::MaliciousHandleViolation:
+        details = "An open malicious handle is detected";
+        m_violationDetails = details;
+        logger.critical() << details;
+        break;
     default:
         break;
     }

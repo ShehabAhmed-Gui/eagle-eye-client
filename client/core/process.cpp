@@ -310,7 +310,7 @@ namespace Process
         return true;
     }
 
-    std::vector<HandleInfo> getHandles(ProcessHandle& process)
+    std::vector<HandleInfo> getHandles(const ProcessHandle& process)
     {
         if (process.isValid() == false) {
             return {};

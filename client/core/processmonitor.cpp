@@ -73,6 +73,25 @@ bool ProcessMonitor::checkDLLInjection(ProcessHandle& processHandle, const Proce
     return false;
 }
 
+bool ProcessMonitor::checkMaliciousHandles(const ProcessHandle& processHandle)
+{
+    if (processHandle.isValid() == false) {
+        return false;
+    }
+
+    const std::wstring cheatEngineExe = L"cheatengine-x86_64.exe";
+
+    std::vector<HandleInfo> handles = getHandles(processHandle);
+    for (HandleInfo& handle : handles)
+    {
+        if (handle.ownerExeName == cheatEngineExe) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool ProcessMonitor::isModuleVerified(const ProcessInfo& process, const std::wstring modulePath)
 {
     // Check if its the process executable
@@ -123,6 +142,12 @@ ViolationType ProcessMonitor::run()
         if (hasDebugger(processHandle)) {
             processHandle.close();
             return ViolationType::DebuggerViolation;
+        }
+
+        // Check for malicious handles
+        if (checkMaliciousHandles(processHandle)) {
+            processHandle.close();
+            return ViolationType::MaliciousHandleViolation;
         }
 
         // Check for malicious DLL injection

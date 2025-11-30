@@ -20,7 +20,8 @@ enum ViolationType {
     HashViolation = 100,
     DebuggerViolation = 200,
     EagleEyeRunningInADebugger = 201,
-    DLLInjectionViolation = 300
+    DLLInjectionViolation = 300,
+    MaliciousHandleViolation = 400
 };
 }
 

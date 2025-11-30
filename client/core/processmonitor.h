@@ -48,8 +48,11 @@ private:
     // Updates ProcessInfo accordingly and returns a handle to the process
     Process::ProcessHandle lookForProcess(ProcessInfo& process);
 
-    // Returns true if malicious DLL injection is detected
+    //Returns true if malicious DLL injection is detected
     bool checkDLLInjection(Process::ProcessHandle& processHandle, const ProcessInfo& processInfo);
+
+    // Checks for malicious handles to the process open on the system
+    bool checkMaliciousHandles(const Process::ProcessHandle& processHandle);
 
     bool isModuleVerified(const ProcessInfo& process, const std::wstring modulePath);
 
