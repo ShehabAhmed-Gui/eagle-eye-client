@@ -73,20 +73,54 @@ bool ProcessMonitor::checkDLLInjection(ProcessHandle& processHandle, const Proce
     return false;
 }
 
+// TODO(omar): move all win32 stuff to Process module
+// WIN32 api stuff, related to checkMaliciousHandles
+#if defined(_WIN32)
+#include <winternl.h>
+
+typedef NTSTATUS (NTAPI *NtQueryObject_t)(
+    HANDLE Handle,
+    OBJECT_INFORMATION_CLASS ObjectInformationClass,
+    PVOID ObjectInformation,
+    ULONG ObjectInformationLength,
+    PULONG ReturnLength
+);
+
+#endif
+
 bool ProcessMonitor::checkMaliciousHandles(const ProcessHandle& processHandle)
 {
     if (processHandle.isValid() == false) {
         return false;
     }
 
-    const std::wstring cheatEngineExe = L"cheatengine-x86_64.exe";
+#if defined(_WIN32)
+    HMODULE ntdll = LoadLibraryA("ntdll.dll");
+    NtQueryObject_t NtQueryObject2 = (NtQueryObject_t)GetProcAddress(ntdll, "NtQueryObject");
+#endif
 
     std::vector<HandleInfo> handles = getHandles(processHandle);
     for (HandleInfo& handle : handles)
     {
-        if (handle.ownerExeName == cheatEngineExe) {
-            return true;
+        // Permission/Access right check
+#if defined(_WIN32)
+        if (!ntdll) continue;
+        if (!NtQueryObject2) continue;
+
+        // First, get the access rights the handle was opened with
+        PUBLIC_OBJECT_BASIC_INFORMATION objectInfo;
+        ULONG returnLength;
+        if (NtQueryObject2(handle.handle.id, ObjectBasicInformation,
+                      &objectInfo, sizeof(objectInfo),
+                      &returnLength) == 0) {
+            DWORD accessRights = objectInfo.GrantedAccess;
+            
+            // Check for certain suspicious access rights
+            if (accessRights & PROCESS_SUSPEND_RESUME) {
+//                logger.debug() << handle.ownerExeName << "Has suspend/resume access";
+            }
         }
+#endif
     }
 
     return false;
