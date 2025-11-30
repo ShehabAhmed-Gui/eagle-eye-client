@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(TestChamber)
+project(SimpleGame)
 
 # Generate compile_commands.json
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
