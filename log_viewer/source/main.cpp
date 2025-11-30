@@ -6,9 +6,11 @@
 #include "../vendor/imgui/imgui_impl_sdl3.h"
 #include "../vendor/imgui/imgui_impl_sdlrenderer3.h"
 
+static const int window_width = 600;
+static const int window_height = 800;
+
 int main(void)
 {
-
     if (!SDL_Init(SDL_INIT_VIDEO | SDL_INIT_GAMEPAD))
     {
         printf("Error: SDL_Init(): %s\n", SDL_GetError());
@@ -18,7 +20,7 @@ int main(void)
     // Create window with SDL_Renderer graphics context
     float main_scale = SDL_GetDisplayContentScale(SDL_GetPrimaryDisplay());
     SDL_WindowFlags window_flags = SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIDDEN | SDL_WINDOW_HIGH_PIXEL_DENSITY;
-    SDL_Window* window = SDL_CreateWindow("EagleEye LogViewer", (int)(1280 * main_scale), (int)(800 * main_scale), window_flags);
+    SDL_Window* window = SDL_CreateWindow("EagleEye LogViewer", (int)(window_width * main_scale), (int)(window_height * main_scale), window_flags);
 
     if (window == nullptr) {
         printf("Error: SDL_CreateWindow(): %s\n", SDL_GetError());
@@ -56,6 +58,8 @@ int main(void)
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
 
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
     bool running = true;
     while (running)
     {
@@ -71,6 +75,26 @@ int main(void)
                 running = true;
             }
         }
+
+        ImGui_ImplSDLRenderer3_NewFrame();
+        ImGui_ImplSDL3_NewFrame();
+        ImGui::NewFrame();
+
+        ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
+        ImGui::SetNextWindowSize(io.DisplaySize);
+        ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+        ImGui::Begin("Full Window", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
+        ImGui::Text("This window fills the entire screen.");
+        ImGui::End();
+        ImGui::PopStyleVar();       
+
+        // Rendering
+        ImGui::Render();
+        SDL_SetRenderScale(renderer, io.DisplayFramebufferScale.x, io.DisplayFramebufferScale.y);
+        SDL_SetRenderDrawColorFloat(renderer, clear_color.x, clear_color.y, clear_color.z, clear_color.w);
+        SDL_RenderClear(renderer);
+        ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
+        SDL_RenderPresent(renderer);       
     }
 
     ImGui_ImplSDLRenderer3_Shutdown();
