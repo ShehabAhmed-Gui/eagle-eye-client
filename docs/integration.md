@@ -2,7 +2,7 @@
 
 Overview
 --------
-EagleEye is a lightweight Windows service that helps ensure your application binary hasn't been tampered with. This document explains how to install, configure, and integrate EagleEye into your application's installer and runtime so you can receive violation notifications reliably.
+EagleEye is a lightweight Windows service that helps ensure your application hasn't been tampered with. This document explains how to install, configure, and integrate EagleEye into your application's installer and runtime so you can receive violation notifications reliably.
 EagleEye is designed to work with your software regardless of what frameworks/libraries you use as long as you integrate EagleEye correctly.
 
 Goals
@@ -70,11 +70,11 @@ Pipe path: \\\\.\\pipe\\eagleeye
 - Communication format: JSON messages over the named pipe.
 - Message framing: 
   - EagleEye messages will always end with a newline terminator (this is. '\\n')
-  - Your named-pipe messages **must** end with newline-terminator (this is. \\n).
+  - Your named-pipe messages **must** end with newline-terminator (this is. '\\n').
 
 Workflow at application startup
 -------------------------------
-1. Connect to \\\\.\\pipe\\eagleeye and maintain a persistent connection.
+1. Connect to \\\\.\\pipe\\eagleeye and maintain a persistent connection. If connection fails, assuming you have followed the documentation, it means EagleEye is not working, so close the application.
 3. Immediately after a successful pipe connection, request a token to learn if a violation occurred while your app was offline.
 
 Token request (JSON)
@@ -110,6 +110,20 @@ Expected responses
 ```
 
 Keep the pipe connection open so that EagleEye can send further messages (e.g., new violations, updates). The service may send messages at any time.
+
+EagleEye will send violation updates if detected.
+
+Violation message (JSON)
+- EagleEye will send this JSON object
+
+```json
+{
+  "status": "violation",
+  "details": "Details about the violation"
+}
+```
+
+You must listen for these updates and take action.
 
 Example integration snippets
 ----------------------------
