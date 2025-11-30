@@ -36,7 +36,7 @@ ProcessMonitor::ProcessMonitor()
 
         processes.push_back(info);
 
-        logger.debug() << info.exePath;
+        logger.debug() << "Monitoring Exe: " info.exePath;
     }
 }
 
@@ -108,7 +108,6 @@ ViolationType ProcessMonitor::run()
 
         // Check for malicious DLL injection
         std::vector<std::wstring> currentModules = std::vector<std::wstring>(getProcessModules(processHandle));
-        logger.debug() << currentModules.size();
         for (const std::wstring &modulePath : currentModules) {
             if (isModuleVerified(process, modulePath) == false) {
                 return ViolationType::DLLInjectionViolation;
