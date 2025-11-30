@@ -19,6 +19,7 @@ Logger logger("Process");
 }
 
 #if defined(_WIN32)
+
 #include <windows.h>
 #include <tlhelp32.h>
 #include <tchar.h>
@@ -68,13 +69,12 @@ static std::wstring GetProcessNameById(DWORD processID)
            GetModuleBaseName(hProcess, hMod, processName, sizeof(processName) / sizeof(TCHAR));
        }
    }
-//   std::wcout << L"Process ID: " << processID << L", Name: " << processName << std::endl;
+
    // Close the handle
    CloseHandle(hProcess);
 
    return processName;
 }
-
 #endif
 
 namespace Process
@@ -351,8 +351,7 @@ namespace Process
             SYSTEM_HANDLE_TABLE_ENTRY_INFO handleInfo = (SYSTEM_HANDLE_TABLE_ENTRY_INFO)handleTableInformation->Handles[i];
 
             DWORD id = GetProcessId((HANDLE)(handleInfo.HandleValue));
-            if (id == GetProcessId(process.id))
-            {
+            if (id == GetProcessId(process.id)) {
                 std::wstring processName = GetProcessNameById(id);
                 ProcessHandle handle;
                 handle.id = (HANDLE)(handleInfo.HandleValue);
@@ -367,6 +366,7 @@ namespace Process
         HeapFree(GetProcessHeap(), 0, handleTableInformation);
         return handles;
 #endif
+
         return {};
     }
 
