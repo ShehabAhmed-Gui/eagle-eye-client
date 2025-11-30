@@ -5,7 +5,6 @@ EagleEye is a Windows, macOS, Linux service/deamon aimed to protect desktop appl
 
 # Features
 * Protects your software files from being modified using hashing.
-* Detects if your software is opened in an cheat engine.
 * Detects if your software is running in a debugger.
 * Realtime DLL injection detection.
 * IPC to communicate with your software.
