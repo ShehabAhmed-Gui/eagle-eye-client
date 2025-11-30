@@ -94,7 +94,7 @@ int main(void)
 
         ImGui::PushTextWrapPos();
 
-        std::ifstream logFile("C:/Users/omare/Documents/EagleEye.log");
+        std::ifstream logFile("C:/ProgramData/EagleEye/EagleEye.log");
         if (logFile.is_open()) {
             std::string line;
             while (std::getline(logFile, line))
