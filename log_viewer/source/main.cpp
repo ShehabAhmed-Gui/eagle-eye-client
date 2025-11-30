@@ -9,8 +9,8 @@
 #include "../vendor/imgui/imgui_impl_sdl3.h"
 #include "../vendor/imgui/imgui_impl_sdlrenderer3.h"
 
-static const int window_width = 600;
-static const int window_height = 800;
+static const int window_width = 1024;
+static const int window_height = 768;
 
 int main(void)
 {
@@ -60,6 +60,9 @@ int main(void)
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
 
+    ImFont* font = io.Fonts->AddFontFromFileTTF("Inter/Inter_18pt-Regular.ttf", 18.0f);
+    IM_ASSERT(font != NULL);
+
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     bool running = true;
@@ -82,6 +85,8 @@ int main(void)
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
+        ImGui::PushFont(font);
+
         ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
         ImGui::SetNextWindowSize(io.DisplaySize);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
@@ -103,6 +108,7 @@ int main(void)
 
         ImGui::End();
         ImGui::PopStyleVar(); 
+        ImGui::PopFont();
 
         // Rendering
         ImGui::Render();
