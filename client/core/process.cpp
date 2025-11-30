@@ -192,7 +192,7 @@ namespace Process
 #if defined(_WIN32)
         // Wait until the process is waiting for input
         // increasing the chance that all the "startup" dlls have been injected
-        WaitForInputIdle(process.id, 2000);
+        WaitForInputIdle(process.id, 10000);
 
         HMODULE modules[1024];
         DWORD bytesNeeded;
