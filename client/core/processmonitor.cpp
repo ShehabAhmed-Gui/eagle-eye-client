@@ -90,6 +90,7 @@ ViolationType ProcessMonitor::run()
     if (hasDebugger(service_process)) {
         return ViolationType::EagleEyeRunningInADebugger;
     }
+    service_process.close();
 
     // 2. Go through every executable we monitor
     // check if its running as a process
@@ -103,6 +104,7 @@ ViolationType ProcessMonitor::run()
         // Check if the process is running
         // in a debugger
         if (hasDebugger(processHandle)) {
+            processHandle.close();
             return ViolationType::DebuggerViolation;
         }
 
@@ -110,9 +112,12 @@ ViolationType ProcessMonitor::run()
         std::vector<std::wstring> currentModules = std::vector<std::wstring>(getProcessModules(processHandle));
         for (const std::wstring &modulePath : currentModules) {
             if (isModuleVerified(process, modulePath) == false) {
+                processHandle.close();
                 return ViolationType::DLLInjectionViolation;
             }
         }
+
+        processHandle.close();
     }
 
     return ViolationType::NoViolation;
