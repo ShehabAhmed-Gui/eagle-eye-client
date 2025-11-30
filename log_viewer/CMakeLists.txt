@@ -8,16 +8,14 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # Our Project
 
-set(SOURCES source/main.cpp
-            vendor/imgui/imgui.cpp
-            vendor/imgui/imgui_demo.cpp
-            vendor/imgui/imgui_draw.cpp
-            vendor/imgui/imgui_tables.cpp
-            vendor/imgui/imgui_widgets.cpp)
+set(SOURCES source/main.cpp)
 
-set(HEADERS vendor/imgui/imgui.h)
+file(GLOB IMGUI_SRC
+     "vendor/imgui/*.h"
+     "vendor/imgui/*.cpp"
+)
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+add_executable(${PROJECT_NAME} ${SOURCES} ${IMGUI_SRC})
 
 # Find SDL3 package
 find_package(SDL3 REQUIRED)
