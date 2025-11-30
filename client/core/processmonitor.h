@@ -23,7 +23,7 @@
 #include "defs.h"
 #include "process.h"
 
-using ViolationType = eagle_eye::ViolationType;
+using eagle_eye::ViolationType;
 
 class ProcessMonitor
 {
@@ -34,11 +34,21 @@ public:
     ViolationType run();
 
 private:
-    Process::ProcessHandle process;
-    std::vector<std::wstring> processModules;
+    struct ProcessInfo
+    {
+        // Absolute path to the executable
+        std::wstring exePath;
+        std::vector<std::wstring> startupModules;
+    };
 
-    void lookForProcess();
-    bool isModuleVerified(const std::wstring modulePath);
+    // Info about the processes we monitor
+    std::vector<ProcessInfo> processes;
+
+    // Checks if the process is running
+    // Updates ProcessInfo accordingly and returns a handle to the process
+    Process::ProcessHandle lookForProcess(ProcessInfo& process);
+    bool isModuleVerified(const ProcessInfo& process, const std::wstring modulePath);
+
 };
 
 #endif // PROCESSMONITOR_H

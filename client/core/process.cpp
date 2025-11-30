@@ -140,15 +140,12 @@ namespace Process
         if (Process32First(processSnapshot, &processEntry) == TRUE) { 
            while (Process32Next(processSnapshot, &processEntry) == TRUE) {
                 if (wcscmp(processEntry.szExeFile, fileInfo.fileName().toStdWString().c_str()) == 0) {
-                    // To terminate a process
-                    // we need a handle with at least PROCESS_TERMINATE access rights
-                    HANDLE processHandle = OpenProcess(PROCESS_TERMINATE | PROCESS_QUERY_LIMITED_INFORMATION,
+                    HANDLE processHandle = OpenProcess(PROCESS_ALL_ACCESS,
                                                                 FALSE,
                                                                 processEntry.th32ProcessID);
 
                     ProcessHandle process;
                     process.id = processHandle;
-
                     return process;
                 }
             }
@@ -192,7 +189,7 @@ namespace Process
         HMODULE modules[1024];
         DWORD bytesNeeded;
         if (EnumProcessModules(process.id, modules, sizeof(modules), &bytesNeeded) == 0) {
-            //TODO(omar): Log
+            logger.warning() << "Enumerating process modules failed, error: " << GetLastError();
             return {};
         }
 
@@ -223,7 +220,7 @@ namespace Process
         threadEntry.dwSize = sizeof(THREADENTRY32);
 
         if (Thread32First(threadSnapshot, &threadEntry) == FALSE) {
-            // TODO(omar): Log
+            logger.error() << "Thread32First failed";
             CloseHandle(threadSnapshot);
             return {};
         }
