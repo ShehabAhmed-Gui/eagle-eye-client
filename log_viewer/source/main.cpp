@@ -62,6 +62,7 @@ int main(void)
         SDL_Event event;
         while (SDL_PollEvent(&event))
         {
+            ImGui_ImplSDL3_ProcessEvent(&event);
             if (event.type == SDL_EVENT_QUIT) {
                 running = false;
             }
@@ -70,8 +71,6 @@ int main(void)
                 running = true;
             }
         }
-
-        
     }
 
     ImGui_ImplSDLRenderer3_Shutdown();
