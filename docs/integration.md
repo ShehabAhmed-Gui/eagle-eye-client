@@ -13,9 +13,9 @@ Goals
 
 Prerequisites
 - Installer must run with Administrator privileges.
-- EagleEye must be avaialble in your software directory as a child directory.
+- EagleEye must be available in your software directory as a child directory.
 - Target machine: Windows (service + named pipes supported).
-- Your Pipe messages must end with a newline-terminator.
+- Your pipe messages must end with a newline-terminator.
 
 Installing the service
 ----------------------
