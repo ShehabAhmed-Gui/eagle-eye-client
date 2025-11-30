@@ -100,6 +100,7 @@ ViolationType ProcessMonitor::run()
         if (processHandle.isValid() == false) {
             continue;
         }
+        logger.debug() << "Checking " << process.exePath;
 
         // Check if the process is running
         // in a debugger
