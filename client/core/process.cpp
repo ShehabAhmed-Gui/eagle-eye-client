@@ -19,11 +19,62 @@ Logger logger("Process");
 }
 
 #if defined(_WIN32)
+
 #include <windows.h>
 #include <tlhelp32.h>
 #include <tchar.h>
+#include <winternl.h>
 #include <psapi.h>
 #include <softpub.h>
+
+#define SystemHandleInformation 0x10
+
+using fNtQuerySystemInformation = NTSTATUS(WINAPI*)(
+    ULONG SystemInformationClass,
+    PVOID SystemInformation,
+    ULONG SystemInformationLength,
+    PULONG ReturnLength
+);
+
+// handle information
+typedef struct _SYSTEM_HANDLE_TABLE_ENTRY_INFO
+{
+    USHORT UniqueProcessId;
+    USHORT CreatorBackTraceIndex;
+    UCHAR ObjectTypeIndex;
+    UCHAR HandleAttributes;
+    USHORT HandleValue;
+    PVOID Object;
+    ULONG GrantedAccess;
+} SYSTEM_HANDLE_TABLE_ENTRY_INFO, *PSYSTEM_HANDLE_TABLE_ENTRY_INFO;
+
+// handle table information
+typedef struct _SYSTEM_HANDLE_INFORMATION
+{
+    ULONG NumberOfHandles;
+    SYSTEM_HANDLE_TABLE_ENTRY_INFO Handles[1];
+} SYSTEM_HANDLE_INFORMATION, *PSYSTEM_HANDLE_INFORMATION;
+
+//TODO(): Move this into a Process namespace platform independent function
+static std::wstring GetProcessNameById(DWORD processID)
+{
+   TCHAR processName[MAX_PATH] = TEXT("<unknown>");
+   // Open the process with required access rights
+   HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID);
+   if (hProcess) {
+       HMODULE hMod;
+       DWORD cbNeeded;
+       // Get the first module (main executable)
+       if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeeded)) {
+           GetModuleBaseName(hProcess, hMod, processName, sizeof(processName) / sizeof(TCHAR));
+       }
+   }
+
+   // Close the handle
+   CloseHandle(hProcess);
+
+   return processName;
+}
 #endif
 
 namespace Process
@@ -266,6 +317,57 @@ namespace Process
 
         logger.debug() << "Terminated process:" << fileName;
         return true;
+    }
+
+    std::vector<HandleInfo> getHandles(ProcessHandle& process)
+    {
+        if (process.isValid() == false) {
+            return {};
+        }
+
+#if defined(_WIN32)
+        ULONG handleBufferSize = 1024 * 1024 * 1;
+
+        ULONG returnLength = 0;
+        fNtQuerySystemInformation NtQuerySystemInformation = (fNtQuerySystemInformation)GetProcAddress(GetModuleHandle(L"ntdll"), "NtQuerySystemInformation");
+
+        SYSTEM_HANDLE_INFORMATION* handleTableInformation = (SYSTEM_HANDLE_INFORMATION*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, handleBufferSize); 
+        NtQuerySystemInformation(SystemHandleInformation, handleTableInformation,
+                                handleBufferSize, &returnLength);
+
+        if (returnLength > handleBufferSize) {
+            handleBufferSize = sizeof(SYSTEM_HANDLE_INFORMATION) + returnLength;
+
+            HeapFree(GetProcessHeap(), 0, handleTableInformation);
+            handleTableInformation = (SYSTEM_HANDLE_INFORMATION*)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, handleBufferSize); 
+
+            NtQuerySystemInformation(SystemHandleInformation, handleTableInformation,
+                                    handleBufferSize, &returnLength);
+        }
+
+        std::vector<HandleInfo> handles;
+        for (int i = 0; i < handleTableInformation->NumberOfHandles; i++)
+        {
+            SYSTEM_HANDLE_TABLE_ENTRY_INFO handleInfo = (SYSTEM_HANDLE_TABLE_ENTRY_INFO)handleTableInformation->Handles[i];
+
+            DWORD id = GetProcessId((HANDLE)(handleInfo.HandleValue));
+            if (id == GetProcessId(process.id)) {
+                std::wstring processName = GetProcessNameById(id);
+                ProcessHandle handle;
+                handle.id = (HANDLE)(handleInfo.HandleValue);
+
+                HandleInfo info;
+                info.ownerExeName = GetProcessNameById(handleInfo.UniqueProcessId);
+                info.handle = handle;
+                handles.push_back(info);
+            }
+        }
+
+        HeapFree(GetProcessHeap(), 0, handleTableInformation);
+        return handles;
+#endif
+
+        return {};
     }
 
     bool isFileSigned(const std::wstring path)

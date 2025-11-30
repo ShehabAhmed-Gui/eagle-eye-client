@@ -42,6 +42,14 @@ namespace Process
         void close();
     };
 
+    // Contains information about a process handle
+    // Used by getHandles() function
+    struct HandleInfo
+    {
+        ProcessHandle handle;
+        std::wstring ownerExeName; //exe name of the process that owns the handle
+    };
+
     void closeProcess(ProcessHandle& process);
     bool killProcess(const QString &fileName);
 
@@ -63,6 +71,9 @@ namespace Process
 
     // Get ids of all threads owned by the process
     std::vector<uint64_t> getProcessThreads(ProcessHandle& process);
+
+    // Gets all open handles to the process that exist on the system
+    std::vector<HandleInfo> getHandles(ProcessHandle& process);
 
     bool hasDebugger(ProcessHandle& process);
 
