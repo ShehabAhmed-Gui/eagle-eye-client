@@ -1,4 +1,5 @@
 #include <cstdio>
+#include <algorithm>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -60,7 +61,7 @@ int main(void)
     ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
     ImGui_ImplSDLRenderer3_Init(renderer);
 
-    ImFont* font = io.Fonts->AddFontFromFileTTF("Inter/Inter_18pt-Regular.ttf", 18.0f);
+    ImFont* font = io.Fonts->AddFontFromFileTTF("Inter/Inter_18pt-Regular.ttf", 22.0f);
     IM_ASSERT(font != NULL);
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
