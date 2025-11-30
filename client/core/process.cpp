@@ -28,13 +28,21 @@ Logger logger("Process");
 
 namespace Process
 {
-    bool ProcessHandle::isValid()
+    inline bool ProcessHandle::isValid() const
     {
 #if defined(_WIN32)
         // Only nullptr is considered empty.
         return (id != nullptr) && (id != INVALID_HANDLE_VALUE);
 #endif
         return false;
+    }
+
+    void ProcessHandle::close()
+    {
+#if defined(_WIN32)
+        CloseHandle(id);
+        id = nullptr;
+#endif
     }
 
     bool hasDebugger(ProcessHandle& process)

@@ -36,7 +36,10 @@ namespace Process
         HANDLE id = nullptr;
 #endif
         // Checks if the process id/handle is invalid
-        bool isValid();
+        inline bool isValid() const;
+
+        // Closes the handle and makes it invalid
+        void close();
     };
 
     void closeProcess(ProcessHandle& process);
