@@ -36,7 +36,14 @@ namespace Process
         HANDLE id = nullptr;
 #endif
         // Checks if the process id/handle is invalid
-        inline bool isValid() const;
+        inline bool isValid() const
+        {
+#if defined(_WIN32)
+            // Only nullptr is considered empty.
+            return (id != nullptr) && (id != INVALID_HANDLE_VALUE);
+#endif
+            return false;
+        }
 
         // Closes the handle and makes it invalid
         void close();

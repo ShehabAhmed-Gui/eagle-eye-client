@@ -29,7 +29,7 @@ ProcessMonitor::ProcessMonitor()
 {
     QVector<QString> exePaths = FilesManager::getExeFiles(Utils::getMainAppLocation());
 
-    for (QString exePath : std::as_const(exePaths))
+    for (const QString &exePath : std::as_const(exePaths))
     {
         ProcessInfo info;
         info.exePath = exePath.toStdWString();
