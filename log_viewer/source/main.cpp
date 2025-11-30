@@ -91,7 +91,6 @@ int main(void)
         ImGui::SetNextWindowSize(io.DisplaySize);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
         ImGui::Begin("Logs", nullptr, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
-
         ImGui::PushTextWrapPos();
 
         std::ifstream logFile("C:/ProgramData/EagleEye/log/EagleEye.log");
@@ -105,6 +104,11 @@ int main(void)
         }
 
         ImGui::PopTextWrapPos();
+
+        bool is_at_bottom = ImGui::GetScrollY() >= ImGui::GetScrollMaxY();
+        if (is_at_bottom) {
+            ImGui::SetScrollHereY(1.0f);           
+        }
 
         ImGui::End();
         ImGui::PopStyleVar(); 
