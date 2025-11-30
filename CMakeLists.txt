@@ -47,8 +47,8 @@ set(HEADERS
 
 include(3rdparty/service_src/qtservice.cmake)
 
-add_subdirectory(test_chamber)
 add_subdirectory(log_viewer)
+add_subdirectory(examples/simplegame)
 
 qt_add_executable(${PROJECT}
     ${SOURCES}
