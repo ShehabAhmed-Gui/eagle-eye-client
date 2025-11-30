@@ -36,7 +36,7 @@ ProcessMonitor::ProcessMonitor()
 
         processes.push_back(info);
 
-        logger.debug() << "Monitoring Exe: " info.exePath;
+        logger.debug() << "Monitoring Exe: " << info.exePath;
     }
 }
 
