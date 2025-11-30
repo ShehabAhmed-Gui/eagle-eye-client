@@ -99,7 +99,31 @@ int main(void)
             std::string line;
             while (std::getline(logFile, line))
             {
+                std::size_t type_start_pos = line.find('[');
+                std::size_t type_end_pos = line.find(']');
+                std::string type = line.substr(type_start_pos+1, (type_end_pos-type_start_pos)-1);
+
+                ImU32 color = IM_COL32(255, 255, 255, 255);
+
+                if (type == "DEBUG") {
+
+                }
+                else if (type == "INFO") {
+                    
+                }
+                else if (type == "CRITICAL") {
+                    color = IM_COL32(220, 0, 0, 255);
+                }
+                else if (type == "WARNING") {
+                    color = IM_COL32(255, 255, 0, 255);
+                }
+                else if (type == "ERROR") {
+                    color = IM_COL32(180, 10, 10, 255);                   
+                }
+
+                ImGui::PushStyleColor(ImGuiCol_Text, color);
                 ImGui::Text(line.c_str());
+                ImGui::PopStyleColor();
             }
             logFile.close();
         }
