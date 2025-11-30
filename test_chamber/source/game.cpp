@@ -33,12 +33,15 @@ Game::Game()
     map.load_from_file("example_map.txt");
 
     background = LoadTexture("background.png");
+    // Font must be loaded at the biggest size we will use to get good quality
+    font = LoadFontEx("Inter/Inter_18pt-Bold.ttf", 96, nullptr, 0);
 }
 
 Game::~Game()
 {
     map.clear();
     UnloadTexture(background);
+    UnloadFont(font);
 }
 
 void Game::loop()
@@ -99,9 +102,9 @@ void Game::draw()
             ClearBackground(BLACK);
 
             Color color = {200, 20, 20, 255};
-            draw_centered_text("Violation Detected", 0.25f, 48, color);
+            draw_centered_text("Violation Detected", 0.1f, font.baseSize, color);
 
-            draw_centered_text(m_violation_details.c_str(), 0.5f, 24, color);
+            draw_centered_text(m_violation_details.c_str(), 0.5f, font.baseSize * 0.5, color);
         } break;
     }
 
@@ -111,16 +114,17 @@ void Game::draw()
 
 void Game::draw_centered_text(const char* text, float y_factor, int font_size, Color color)
 {
-    int text_width = MeasureText(text, font_size);
+    Vector2 text_size = MeasureTextEx(font, text, font_size, 0);
     int screen_width = GetScreenWidth();
     int screen_height = GetScreenHeight();
 
     // Calculate centered position
-    int x = (screen_width - text_width) / 2;
+    int x = (screen_width - text_size.x) / 2;
     int y = (screen_height - font_size) * y_factor;
 
     // Draw centered text
-    DrawText(text, x, y, font_size, color); 
+    Vector2 pos = {x, y};
+    DrawTextEx(font, text, pos, font_size, 0, color);
 }
 
 void Game::init_anticheat()

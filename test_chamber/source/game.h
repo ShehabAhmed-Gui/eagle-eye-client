@@ -43,6 +43,7 @@ public:
     GameMap map;
     Texture2D background;
     Player player;
+    Font font;
 
     Game();
     ~Game();
