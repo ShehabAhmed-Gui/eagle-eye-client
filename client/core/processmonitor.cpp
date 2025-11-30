@@ -36,7 +36,7 @@ ProcessMonitor::ProcessMonitor()
 
         processes.push_back(info);
 
-        logger.debug() << "Monitoring Exe: " << info.exePath;
+        logger.debug() << "Monitoring Exe:" << info.exePath;
     }
 }
 
@@ -93,7 +93,7 @@ bool ProcessMonitor::isModuleVerified(const ProcessInfo& process, const std::wst
         return true;
     }
 
-    logger.warning() << "Unverified DLL: " << modulePath;
+    logger.warning() << "Unverified DLL:" << modulePath;
     return false;
 }
 
@@ -116,7 +116,7 @@ ViolationType ProcessMonitor::run()
         if (processHandle.isValid() == false) {
             continue;
         }
-        logger.debug() << "Checking " << process.exePath;
+        logger.debug() << "Checking" << process.exePath;
 
         // Check if the process is running
         // in a debugger
