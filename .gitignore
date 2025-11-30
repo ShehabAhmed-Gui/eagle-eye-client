@@ -14,3 +14,8 @@ out/*
 /3rdparty/qkeychain/translations
 /test_chamber/out
 /test_chamber/source/.vscode
+/log_viewer/build
+/log_viewer/vendor/imgui/examples
+/log_viewer/.vscode
+/log_viewer/vendor/imgui/.github
+/log_viewer/vendor/imgui/misc
