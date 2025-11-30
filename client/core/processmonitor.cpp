@@ -57,6 +57,22 @@ ProcessHandle ProcessMonitor::lookForProcess(ProcessInfo& info)
     return processHandle;
 }
 
+bool ProcessMonitor::checkDLLInjection(ProcessHandle& processHandle, const ProcessInfo& processInfo)
+{
+    if (processHandle.isValid() == false) {
+        return false;
+    }
+
+    std::vector<std::wstring> currentModules = std::vector<std::wstring>(getProcessModules(processHandle));
+    for (const std::wstring &modulePath : currentModules) {
+        if (isModuleVerified(processInfo, modulePath) == false) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 bool ProcessMonitor::isModuleVerified(const ProcessInfo& process, const std::wstring modulePath)
 {
     // Check if its the process executable
@@ -110,12 +126,9 @@ ViolationType ProcessMonitor::run()
         }
 
         // Check for malicious DLL injection
-        std::vector<std::wstring> currentModules = std::vector<std::wstring>(getProcessModules(processHandle));
-        for (const std::wstring &modulePath : currentModules) {
-            if (isModuleVerified(process, modulePath) == false) {
-                processHandle.close();
-                return ViolationType::DLLInjectionViolation;
-            }
+        if (checkDLLInjection(processHandle, process)) {
+            processHandle.close();
+            return ViolationType::DLLInjectionViolation;
         }
 
         processHandle.close();
