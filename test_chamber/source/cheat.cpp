@@ -60,7 +60,7 @@ namespace EagleEye
             return false;
         }
 
-        std::cout << "Connected to EagleEye's pipe" << std::endl;
+//        std::cout << "Connected to EagleEye's pipe" << std::endl;
         return true;
 #endif
         return false;
@@ -79,7 +79,7 @@ namespace EagleEye
             return false;
         }
 
-        std::cout << "Sending message: " << msg << std::endl;
+//        std::cout << "Sending message: " << msg << std::endl;
 
 #if defined(_WIN32)
         // Send message
@@ -111,8 +111,8 @@ namespace EagleEye
                  MAX_MSG_SIZE,
                  &bytes_read,
                  nullptr) == 0) {
-            std::cout << "ReadFile failed with error: "
-                      << GetLastError() << std::endl;
+//            std::cout << "ReadFile failed with error: "
+//                      << GetLastError() << std::endl;
             return {};
         }
 
