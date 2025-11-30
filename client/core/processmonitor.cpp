@@ -17,38 +17,71 @@
 #include "filesmanager.h"
 #include "utils.h"
 
+#include <vector>
+
 namespace {
 Logger logger("ProcessMonitor");
 }
 
+using namespace Process;
+
 ProcessMonitor::ProcessMonitor()
 {
-    lookForProcess();
+    QVector<QString> exePaths = FilesManager::getExeFiles(Utils::getMainAppLocation());
+
+    for (QString exePath : std::as_const(exePaths))
+    {
+        ProcessInfo info;
+        info.exePath = exePath.toStdWString();
+
+        processes.push_back(info);
+
+        logger.debug() << "Monitoring Exe: " << info.exePath;
+    }
 }
 
-void ProcessMonitor::lookForProcess()
+ProcessHandle ProcessMonitor::lookForProcess(ProcessInfo& info)
 {
-    process = Process::getProcessByExeName(L"TestChamber.exe");
+    ProcessHandle processHandle = Process::getProcess(info.exePath);
 
-    if (process.isValid() == false) {
-        //logger.error() << "Couldn't find the test chamber process";
+    if (processHandle.isValid()) {
+        // Make sure to not overwrite the startup modules
+        if (info.startupModules.empty()) {
+            info.startupModules = std::vector<std::wstring>(getProcessModules(processHandle));
+        }
     }
     else {
-        logger.info() << "Test chamber process found";
-        processModules = Process::getProcessModules(process);
+        info.startupModules.clear();
     }
+
+    return processHandle;
 }
 
-bool ProcessMonitor::isModuleVerified(const std::wstring modulePath)
+bool ProcessMonitor::checkDLLInjection(ProcessHandle& processHandle, const ProcessInfo& processInfo)
+{
+    if (processHandle.isValid() == false) {
+        return false;
+    }
+
+    std::vector<std::wstring> currentModules = std::vector<std::wstring>(getProcessModules(processHandle));
+    for (const std::wstring &modulePath : currentModules) {
+        if (isModuleVerified(processInfo, modulePath) == false) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool ProcessMonitor::isModuleVerified(const ProcessInfo& process, const std::wstring modulePath)
 {
     // Check if its the process executable
-    std::wstring processPath = Process::getProcessPath(process);
-    if (modulePath == processPath) {
+    if (process.exePath == modulePath) {
         return true;
     }
 
     // Check if its part of the startup modules, which we deem as verified
-    for (std::wstring startupModule : processModules)
+    for (const std::wstring &startupModule : process.startupModules)
     {
         if (modulePath == startupModule) {
             return true;
@@ -56,7 +89,7 @@ bool ProcessMonitor::isModuleVerified(const std::wstring modulePath)
     }
 
     // Check if it has a valid digital signature
-    if (Process::isFileSigned(modulePath)) {
+    if (isFileSigned(modulePath)) {
         return true;
     }
 
@@ -66,41 +99,39 @@ bool ProcessMonitor::isModuleVerified(const std::wstring modulePath)
 
 ViolationType ProcessMonitor::run()
 {
-    // Look for the process if we haven't found it yet
-    if (process.isValid() == false) {
-        lookForProcess();
-    }
-
     // 1. Check if our service is running
     // in a debugger
-    Process::ProcessHandle service_process = {};
+    ProcessHandle service_process = {};
     service_process.id = GetCurrentProcess();
-    if (Process::hasDebugger(service_process)) {
+    if (hasDebugger(service_process)) {
         return ViolationType::EagleEyeRunningInADebugger;
     }
+    service_process.close();
 
-    // 2. Check if any process
-    // of the the main app is running in a debugger
-    for (const QString &file : FilesManager::getExeFiles(Utils::getMainAppLocation())) {
-        // Get a handle to the process
-        Process::ProcessHandle process = Process::getProcess(file.toStdWString());
-        if (Process::hasDebugger(process)) {
+    // 2. Go through every executable we monitor
+    // check if its running as a process
+    // and perform monitor checks on it
+    for (ProcessInfo& process : processes) {
+        ProcessHandle processHandle = lookForProcess(process);
+        if (processHandle.isValid() == false) {
+            continue;
+        }
+        logger.debug() << "Checking " << process.exePath;
+
+        // Check if the process is running
+        // in a debugger
+        if (hasDebugger(processHandle)) {
+            processHandle.close();
             return ViolationType::DebuggerViolation;
         }
-    }
 
-    if (process.isValid()) {
-        // 3. Check for injected dlls in the main executable
-
-        // Check for unverified DLLs
-        std::vector<std::wstring> currentModules = Process::getProcessModules(process);
-
-        for (std::wstring modulePath : currentModules)
-        {
-            if (isModuleVerified(modulePath) == false) {
-                return ViolationType::DLLInjectionViolation;
-            }
+        // Check for malicious DLL injection
+        if (checkDLLInjection(processHandle, process)) {
+            processHandle.close();
+            return ViolationType::DLLInjectionViolation;
         }
+
+        processHandle.close();
     }
 
     return ViolationType::NoViolation;

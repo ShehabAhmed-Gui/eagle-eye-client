@@ -14,7 +14,7 @@
 #include "securitymonitor.h"
 #include "logger.h"
 
-#define VERIFY_TIME_MSEC 10000
+#define VERIFY_TIME_MSEC 2000
 
 namespace {
 Logger logger("SecurityMonitor");
