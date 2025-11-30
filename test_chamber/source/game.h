@@ -42,6 +42,8 @@ private:
 public:
     GameMap map;
     Texture2D background;
+    Texture2D anticheat_logo;
+
     Player player;
     Font font;
 

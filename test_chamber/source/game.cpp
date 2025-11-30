@@ -33,6 +33,9 @@ Game::Game()
     map.load_from_file("example_map.txt");
 
     background = LoadTexture("background.png");
+    anticheat_logo = LoadTexture("eelogo.png");
+    SetTextureFilter(anticheat_logo, TEXTURE_FILTER_ANISOTROPIC_16X);
+
     // Font must be loaded at the biggest size we will use to get good quality
     font = LoadFontEx("Inter/Inter_18pt-Bold.ttf", 96, nullptr, 0);
 }
@@ -40,7 +43,10 @@ Game::Game()
 Game::~Game()
 {
     map.clear();
+
     UnloadTexture(background);
+    UnloadTexture(anticheat_logo);
+
     UnloadFont(font);
 }
 
@@ -103,8 +109,12 @@ void Game::draw()
 
             Color color = {200, 20, 20, 255};
             draw_centered_text("Violation Detected", 0.1f, font.baseSize, color);
-
             draw_centered_text(m_violation_details.c_str(), 0.5f, font.baseSize * 0.5, color);
+
+            Rectangle logo_source = {0, 0, anticheat_logo.width, anticheat_logo.height};
+            Rectangle logo_dest = {0, 0, 1024 / 4, 1024 / 4};
+
+            DrawTexturePro(anticheat_logo, logo_source, logo_dest, {0, 0}, 0, WHITE);
         } break;
     }
 
