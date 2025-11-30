@@ -1,4 +1,7 @@
 #include <cstdio>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 #include <SDL3/SDL.h>
 
@@ -83,10 +86,24 @@ int main(void)
         ImGui::SetNextWindowPos(ImVec2(0.0f, 0.0f));
         ImGui::SetNextWindowSize(io.DisplaySize);
         ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-        ImGui::Begin("Full Window", nullptr, ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
-        ImGui::Text("This window fills the entire screen.");
+        ImGui::Begin("Logs", nullptr, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoResize);
+
+        ImGui::PushTextWrapPos();
+
+        std::ifstream logFile("C:/Users/omare/Documents/EagleEye.log");
+        if (logFile.is_open()) {
+            std::string line;
+            while (std::getline(logFile, line))
+            {
+                ImGui::Text(line.c_str());
+            }
+            logFile.close();
+        }
+
+        ImGui::PopTextWrapPos();
+
         ImGui::End();
-        ImGui::PopStyleVar();       
+        ImGui::PopStyleVar(); 
 
         // Rendering
         ImGui::Render();
@@ -96,7 +113,6 @@ int main(void)
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);       
     }
-
     ImGui_ImplSDLRenderer3_Shutdown();
     ImGui_ImplSDL3_Shutdown();
     ImGui::DestroyContext();
