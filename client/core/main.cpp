@@ -23,8 +23,9 @@
 
 int main(int argc, char *argv[])
 {
-    Logger::init();
     SystemService service(argc, argv);
+
+    Logger::init();
 
     QCoreApplication::setApplicationName("EagleEye");
     QCoreApplication::setApplicationVersion("1.0");
