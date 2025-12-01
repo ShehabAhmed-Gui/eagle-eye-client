@@ -26,7 +26,7 @@ namespace EagleEye
 {
     const std::string service_name = "EagleEye service";
     const std::string pipe_name = R"(\\.\pipe\eagleeye)";
-    const std::string app_id = "com.test.TestChamber";
+    const std::string app_id = "com.test.SimpleGame";
 
     const int MAX_MSG_SIZE = 1024;
 
