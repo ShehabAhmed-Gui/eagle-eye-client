@@ -40,6 +40,60 @@ ProcessMonitor::ProcessMonitor()
     }
 }
 
+ViolationType ProcessMonitor::CheckForDllInjection()
+{
+    for (ProcessInfo& process : processes) {
+        ProcessHandle processHandle = lookForProcess(process);
+        if (processHandle.isValid() == false) {
+            continue;
+        }
+        logger.debug() << "Checking" << process.exePath
+                       << "for dll injections";
+
+        // Check for malicious DLL injection
+        if (checkDLLInjection(processHandle, process)) {
+            processHandle.close();
+            return ViolationType::DLLInjectionViolation;
+        }
+
+        processHandle.close();
+    }
+
+    return ViolationType::NoViolation;
+}
+
+ViolationType ProcessMonitor::CheckForDebugger()
+{
+    // 1. Check if our service is running
+    // in a debugger
+    ProcessHandle service_process = {};
+    service_process.id = GetCurrentProcess();
+    if (hasDebugger(service_process)) {
+        return ViolationType::EagleEyeRunningInADebugger;
+    }
+    service_process.close();
+
+    // 2. Go through every executable we monitor
+    // check if its running as a process
+    // and perform monitor checks on it
+    for (ProcessInfo& process : processes) {
+        ProcessHandle processHandle = lookForProcess(process);
+        if (processHandle.isValid() == false) {
+            continue;
+        }
+        logger.debug() << "Checking" << process.exePath
+                       << "if running in a debugger";
+        // Check if the process is running
+        // in a debugger
+        if (hasDebugger(processHandle)) {
+            processHandle.close();
+            return ViolationType::DebuggerViolation;
+        }
+    }
+
+    return ViolationType::NoViolation;
+}
+
 ProcessHandle ProcessMonitor::lookForProcess(ProcessInfo& info)
 {
     ProcessHandle processHandle = Process::getProcess(info.exePath);
@@ -95,45 +149,5 @@ bool ProcessMonitor::isModuleVerified(const ProcessInfo& process, const std::wst
 
     logger.warning() << "Unverified DLL:" << modulePath;
     return false;
-}
-
-ViolationType ProcessMonitor::run()
-{
-    // 1. Check if our service is running
-    // in a debugger
-    ProcessHandle service_process = {};
-    service_process.id = GetCurrentProcess();
-    if (hasDebugger(service_process)) {
-        return ViolationType::EagleEyeRunningInADebugger;
-    }
-    service_process.close();
-
-    // 2. Go through every executable we monitor
-    // check if its running as a process
-    // and perform monitor checks on it
-    for (ProcessInfo& process : processes) {
-        ProcessHandle processHandle = lookForProcess(process);
-        if (processHandle.isValid() == false) {
-            continue;
-        }
-        logger.debug() << "Checking" << process.exePath;
-
-        // Check if the process is running
-        // in a debugger
-        if (hasDebugger(processHandle)) {
-            processHandle.close();
-            return ViolationType::DebuggerViolation;
-        }
-
-        // Check for malicious DLL injection
-        if (checkDLLInjection(processHandle, process)) {
-            processHandle.close();
-            return ViolationType::DLLInjectionViolation;
-        }
-
-        processHandle.close();
-    }
-
-    return ViolationType::NoViolation;
 }
 
