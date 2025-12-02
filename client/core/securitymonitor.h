@@ -15,7 +15,6 @@
 #define SECURITYMONITOR_H
 
 #include <QObject>
-#include <QTimer>
 #include <QSharedPointer>
 #include <QJsonObject>
 
@@ -41,8 +40,12 @@ signals:
     void integrityViolationDetected();
 
 public slots:
-    void integrityCheck();
     void onViolationDetected(eagle_eye::ViolationType type);
+    void startSecurityLoop();
+
+    void fastCheck();
+    void mediumCheck();
+    void slowCheck();
 
 private:
     QString m_violationDetails;
@@ -50,7 +53,11 @@ private:
     QJsonObject m_token;
     QSharedPointer<HashManager> m_hashManager;
     QSharedPointer<ProcessMonitor> m_processMonitor;
-    QTimer *m_timer;
+
+    qint64 m_nextFastCheck;
+    qint64 m_nextMediumCheck;
+    qint64 m_nextSlowCheck;
+    bool m_running = false;
 };
 
 #endif // SECURITYMONITOR_H
