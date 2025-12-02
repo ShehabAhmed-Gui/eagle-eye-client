@@ -34,8 +34,10 @@ void CoreController::init()
 {
     m_hashManager.reset(new HashManager(this));
 
+    // Start security monitor thread
     m_securityMonitor.reset(new SecurityMonitor(m_hashManager, this));
-    m_securityMonitor->activate();
+    connect(m_securityMonitor.get(), &QThread::finished, m_securityMonitor.get(), &QObject::deleteLater);
+    m_securityMonitor->start();
 
     m_daemonServer = new DaemonLocalServer(m_securityMonitor, this);
     m_daemonServer->start();

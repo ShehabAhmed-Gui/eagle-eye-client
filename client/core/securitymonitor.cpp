@@ -14,17 +14,13 @@
 #include "securitymonitor.h"
 #include "logger.h"
 
-#include <QThread>
-
-#define VERIFY_TIME_MSEC 5000
-
 namespace {
 Logger logger("SecurityMonitor");
 }
 
 SecurityMonitor::SecurityMonitor(QSharedPointer<HashManager> hashManager,
                                  QObject *parent)
-    : QObject{parent}
+    : QThread{parent}
     , m_hashManager(hashManager)
 {
     // Seed the random number generator once at program start
@@ -41,10 +37,10 @@ SecurityMonitor::SecurityMonitor(QSharedPointer<HashManager> hashManager,
 
 void SecurityMonitor::activate()
 {
+    logger.debug() << "Activiating security monitor";
     m_hashManager->activate();
     m_running = true;
-
-    logger.debug() << "Security monitor activiated";
+    startSecurityLoop();
 }
 
 void SecurityMonitor::setToken(const QJsonObject &token)
@@ -93,13 +89,15 @@ void SecurityMonitor::onViolationDetected(eagle_eye::ViolationType type)
         break;
     }
 
-    // Don't do any action if there's no violation
+    // Only take action if there is a violation
     if (type != eagle_eye::NoViolation) {
         QJsonObject obj;
         obj.insert("allowed", false);
         obj.insert("details", details);
         setToken(obj);
 
+        // Stop the check loop
+        m_running = false;
         emit integrityViolationDetected();
     }
 }
@@ -111,7 +109,7 @@ void SecurityMonitor::startSecurityLoop()
 
         if (now > m_nextFastCheck) {
             fastCheck();
-            m_nextFastCheck = now + (rand() % 251);
+            m_nextFastCheck = now + (rand() % 501);
         }
 
         if (now > m_nextMediumCheck) {
@@ -147,4 +145,9 @@ void SecurityMonitor::mediumCheck()
 void SecurityMonitor::slowCheck()
 {
     m_hashManager->onSecurityCheck();
+}
+
+void SecurityMonitor::run()
+{
+    activate();
 }

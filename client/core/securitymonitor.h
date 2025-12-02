@@ -17,12 +17,13 @@
 #include <QObject>
 #include <QSharedPointer>
 #include <QJsonObject>
+#include <QThread>
 
 #include "hashmanager.h"
 #include "processmonitor.h"
 #include "defs.h"
 
-class SecurityMonitor : public QObject
+class SecurityMonitor : public QThread
 {
     Q_OBJECT
 public:
@@ -58,6 +59,10 @@ private:
     qint64 m_nextMediumCheck;
     qint64 m_nextSlowCheck;
     bool m_running = false;
+
+    // QThread interface
+protected:
+    void run() override;
 };
 
 #endif // SECURITYMONITOR_H
