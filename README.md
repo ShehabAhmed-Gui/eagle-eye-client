@@ -1,7 +1,7 @@
 # EagleEye
 ## Anti-tampering/Anti-cheat service application
 
-EagleEye is a Windows, macOS, Linux service/deamon aimed to protect desktop applications and games against tampering.
+EagleEye is a Windows service aimed to protect desktop applications and games against tampering.
 
 # Features
 * Protects your software files from being modified using hashing.
