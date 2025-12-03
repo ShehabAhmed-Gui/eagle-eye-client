@@ -17,6 +17,7 @@ SystemService::SystemService(int argc, char **argv)
     : QtService<QCoreApplication>(argc, argv, "EagleEye_service")
 {
     setServiceDescription("EagleEye service");
+    setServiceFlags(ServiceFlags::enum_type::CannotBeStopped);
 }
 
 void SystemService::start()
