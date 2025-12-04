@@ -14,17 +14,18 @@
 #include "securitymonitor.h"
 #include "logger.h"
 
-#define VERIFY_TIME_MSEC 5000
-
 namespace {
 Logger logger("SecurityMonitor");
 }
 
 SecurityMonitor::SecurityMonitor(QSharedPointer<HashManager> hashManager,
                                  QObject *parent)
-    : QObject{parent}
+    : QThread{parent}
     , m_hashManager(hashManager)
 {
+    // Seed the random number generator once at program start
+    srand(static_cast<unsigned int>(time(nullptr)));
+
     connect(m_hashManager.get(), &HashManager::violationDetected, this, &SecurityMonitor::onViolationDetected);
 
     QJsonObject obj;
@@ -36,14 +37,10 @@ SecurityMonitor::SecurityMonitor(QSharedPointer<HashManager> hashManager,
 
 void SecurityMonitor::activate()
 {
+    logger.debug() << "Activiating security monitor";
     m_hashManager->activate();
-
-    m_timer = new QTimer(this);
-    connect(m_timer, &QTimer::timeout, this, &SecurityMonitor::integrityCheck);
-
-    m_timer->setSingleShot(false);
-    m_timer->start(VERIFY_TIME_MSEC);
-    logger.debug() << "Security monitor activiated";
+    m_running = true;
+    startSecurityLoop();
 }
 
 void SecurityMonitor::setToken(const QJsonObject &token)
@@ -59,19 +56,6 @@ QJsonObject SecurityMonitor::token()
 QString SecurityMonitor::getViolationDetails()
 {
     return m_violationDetails;
-}
-
-void SecurityMonitor::integrityCheck()
-{
-    // 1. Run all process checks
-    eagle_eye::ViolationType result = m_processMonitor->run();
-    if (result != ViolationType::NoViolation) {
-        onViolationDetected(result);
-        return;
-    }
-
-    // 2. Run hash integrity check
-    m_hashManager->onSecurityCheck();
 }
 
 void SecurityMonitor::onViolationDetected(eagle_eye::ViolationType type)
@@ -105,15 +89,65 @@ void SecurityMonitor::onViolationDetected(eagle_eye::ViolationType type)
         break;
     }
 
-    // Don't do any action if there's no violation
+    // Only take action if there is a violation
     if (type != eagle_eye::NoViolation) {
-        m_timer->stop();
-
         QJsonObject obj;
         obj.insert("allowed", false);
         obj.insert("details", details);
         setToken(obj);
 
+        // Stop the check loop
+        m_running = false;
         emit integrityViolationDetected();
     }
+}
+
+void SecurityMonitor::startSecurityLoop()
+{
+    while (m_running) {
+        auto now = QDateTime::currentMSecsSinceEpoch();
+
+        if (now > m_nextFastCheck) {
+            fastCheck();
+            m_nextFastCheck = now + (rand() % 501);
+        }
+
+        if (now > m_nextMediumCheck) {
+            mediumCheck();
+            m_nextMediumCheck = now + (rand() % 3001);
+        }
+
+        if (now > m_nextSlowCheck) {
+            slowCheck();
+            m_nextSlowCheck = now + (rand() % 10001);
+        }
+
+        QThread::msleep(50);
+    }
+}
+
+void SecurityMonitor::fastCheck()
+{
+    eagle_eye::ViolationType result = m_processMonitor->CheckForDebugger();
+    if (result != ViolationType::NoViolation) {
+        onViolationDetected(result);
+    }
+}
+
+void SecurityMonitor::mediumCheck()
+{
+    eagle_eye::ViolationType result = m_processMonitor->CheckForDllInjection();
+    if (result != ViolationType::NoViolation) {
+        onViolationDetected(result);
+    }
+}
+
+void SecurityMonitor::slowCheck()
+{
+    m_hashManager->onSecurityCheck();
+}
+
+void SecurityMonitor::run()
+{
+    activate();
 }

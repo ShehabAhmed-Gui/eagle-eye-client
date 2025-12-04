@@ -26,6 +26,9 @@ public:
 public:
     void start() override;
     void stop() override;
+
+private:
+    bool updateServicePermissions();
 };
 
 #endif // SYSTEMSERVICE_H

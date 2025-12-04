@@ -30,8 +30,8 @@ class ProcessMonitor
 public:
     explicit ProcessMonitor();
 
-    // Returns the violation type
-    ViolationType run();
+    ViolationType CheckForDllInjection();
+    ViolationType CheckForDebugger();
 
 private:
     struct ProcessInfo
