@@ -24,6 +24,8 @@
 #include <string>
 #include <vector>
 
+#include <QThread>
+
 namespace Process
 {
     // ProcessHandle's id is by default set to whatever the invalid value is
@@ -49,6 +51,8 @@ namespace Process
         void close();
     };
 
+    void closeProcess(ProcessHandle& process);
+
     // Contains information about a process handle
     // Used by getHandles() function
     struct HandleInfo
@@ -57,35 +61,43 @@ namespace Process
         std::wstring ownerExeName; //exe name of the process that owns the handle
     };
 
-    void closeProcess(ProcessHandle& process);
-    bool killProcess(const QString &fileName);
+    namespace Management {
+        bool killProcess(const QString &fileName);
 
-    // Runs the specified executable (absolute path), returns the handle to its process
-    ProcessHandle runProcess(std::wstring exePath);
+        // Runs the specified executable (absolute path), returns the handle to its process
+        ProcessHandle runProcess(std::wstring exePath);
+        // Gets a current running process by its executable path(absolute path)
+        ProcessHandle getProcess(std::wstring exePath);
 
-    // Gets a current running process by its executable path(absolute path)
-    ProcessHandle getProcess(std::wstring exePath);
+        // Gets a current running process by its executable name
+        ProcessHandle getProcessByExeName(std::wstring exePath);
 
-    // Gets a current running process by its executable name
-    ProcessHandle getProcessByExeName(std::wstring exePath);
+        // Returns the absolute path of the process executable
+        std::wstring getProcessPath(ProcessHandle& process);
+    }
 
-    // Returns the absolute path of the process executable
-    std::wstring getProcessPath(ProcessHandle& process);
+    namespace Info {
+        // Get paths of all the modules attached to the process.
+        // on windows, this includes the main EXE and all loaded DLLs,
+        std::vector<std::wstring> getProcessModules(ProcessHandle& process);
 
-    // Get paths of all the modules attached to the process.
-    // on windows, this includes the main EXE and all loaded DLLs,
-    std::vector<std::wstring> getProcessModules(ProcessHandle& process);
+        // Get ids of all threads owned by the process
+        std::vector<uint64_t> getProcessThreads(ProcessHandle& process);
 
-    // Get ids of all threads owned by the process
-    std::vector<uint64_t> getProcessThreads(ProcessHandle& process);
+        // Gets all open handles to the process that exist on the system
+        std::vector<HandleInfo> getHandles(ProcessHandle& process);
+    }
 
-    // Gets all open handles to the process that exist on the system
-    std::vector<HandleInfo> getHandles(ProcessHandle& process);
+    namespace Security {
+        // Detects if there is mapped modules
+        bool scanForMappedModules(ProcessHandle &process);
+        bool IsAddressInModuleList(void* address);
 
-    bool hasDebugger(ProcessHandle& process);
+        bool hasDebugger(ProcessHandle& process);
 
-    // Check if the file has a valid digital signature
-    bool isFileSigned(const std::wstring path);
+        // Check if the file has a valid digital signature
+        bool isFileSigned(const std::wstring path);
+    }
 }
 
 #endif

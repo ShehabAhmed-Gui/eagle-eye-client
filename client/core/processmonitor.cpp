@@ -23,7 +23,10 @@ namespace {
 Logger logger("ProcessMonitor");
 }
 
-using namespace Process;
+using eagle_eye::ViolationType;
+
+namespace Mgmt = Process::Management;
+namespace Sec = Process::Security;
 
 ProcessMonitor::ProcessMonitor()
 {
@@ -43,7 +46,7 @@ ProcessMonitor::ProcessMonitor()
 ViolationType ProcessMonitor::CheckForDllInjection()
 {
     for (ProcessInfo& process : processes) {
-        ProcessHandle processHandle = lookForProcess(process);
+        Process::ProcessHandle processHandle = Mgmt::getProcess(process.exePath);
         if (processHandle.isValid() == false) {
             continue;
         }
@@ -66,9 +69,9 @@ ViolationType ProcessMonitor::CheckForDebugger()
 {
     // 1. Check if our service is running
     // in a debugger
-    ProcessHandle service_process = {};
+    Process::ProcessHandle service_process = {};
     service_process.id = GetCurrentProcess();
-    if (hasDebugger(service_process)) {
+    if (Sec::hasDebugger(service_process)) {
         return ViolationType::EagleEyeRunningInADebugger;
     }
     service_process.close();
@@ -77,7 +80,7 @@ ViolationType ProcessMonitor::CheckForDebugger()
     // check if its running as a process
     // and perform monitor checks on it
     for (ProcessInfo& process : processes) {
-        ProcessHandle processHandle = lookForProcess(process);
+        Process::ProcessHandle processHandle = Mgmt::getProcess(process.exePath);
         if (processHandle.isValid() == false) {
             continue;
         }
@@ -85,7 +88,7 @@ ViolationType ProcessMonitor::CheckForDebugger()
                        << "if running in a debugger";
         // Check if the process is running
         // in a debugger
-        if (hasDebugger(processHandle)) {
+        if (Sec::hasDebugger(processHandle)) {
             processHandle.close();
             return ViolationType::DebuggerViolation;
         }
@@ -94,30 +97,17 @@ ViolationType ProcessMonitor::CheckForDebugger()
     return ViolationType::NoViolation;
 }
 
-ProcessHandle ProcessMonitor::lookForProcess(ProcessInfo& info)
-{
-    ProcessHandle processHandle = Process::getProcess(info.exePath);
-
-    if (processHandle.isValid()) {
-        // Make sure to not overwrite the startup modules
-        if (info.startupModules.empty()) {
-            info.startupModules = std::vector<std::wstring>(getProcessModules(processHandle));
-        }
-    }
-    else {
-        info.startupModules.clear();
-    }
-
-    return processHandle;
-}
-
-bool ProcessMonitor::checkDLLInjection(ProcessHandle& processHandle, const ProcessInfo& processInfo)
+bool ProcessMonitor::checkDLLInjection(Process::ProcessHandle& processHandle, const ProcessInfo& processInfo)
 {
     if (processHandle.isValid() == false) {
         return false;
     }
 
-    std::vector<std::wstring> currentModules = std::vector<std::wstring>(getProcessModules(processHandle));
+    if (Sec::scanForMappedModules(processHandle)) {
+        return true;
+    }
+
+    std::vector<std::wstring> currentModules = std::vector<std::wstring>(Process::Info::getProcessModules(processHandle));
     for (const std::wstring &modulePath : currentModules) {
         if (isModuleVerified(processInfo, modulePath) == false) {
             return true;
@@ -129,22 +119,19 @@ bool ProcessMonitor::checkDLLInjection(ProcessHandle& processHandle, const Proce
 
 bool ProcessMonitor::isModuleVerified(const ProcessInfo& process, const std::wstring modulePath)
 {
+    QString path = QString::fromStdWString(modulePath);
+    if (path.contains("Windows\\SYSTEM32") || path.contains("Windows\\SysWOW64")) {
+        return true;
+    }
+
     // Check if its the process executable
     if (process.exePath == modulePath) {
         return true;
     }
 
-    // Check if its part of the startup modules, which we deem as verified
-    for (const std::wstring &startupModule : process.startupModules)
-    {
-        if (modulePath == startupModule) {
-            return true;
-        }
-    }
-
     // Check if it has a valid digital signature
-    if (isFileSigned(modulePath)) {
-        return true;
+    if (!Sec::isFileSigned(modulePath)) {
+        logger.warning() << "Unsigned module file:" << modulePath;
     }
 
     logger.warning() << "Unverified DLL:" << modulePath;

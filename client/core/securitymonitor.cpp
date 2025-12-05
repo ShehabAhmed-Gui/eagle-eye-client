@@ -18,6 +18,8 @@ namespace {
 Logger logger("SecurityMonitor");
 }
 
+using eagle_eye::ViolationType;
+
 SecurityMonitor::SecurityMonitor(QSharedPointer<HashManager> hashManager,
                                  QObject *parent)
     : QThread{parent}

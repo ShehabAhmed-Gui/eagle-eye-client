@@ -23,36 +23,28 @@
 #include "defs.h"
 #include "process.h"
 
-using eagle_eye::ViolationType;
-
 class ProcessMonitor
 {
 public:
     explicit ProcessMonitor();
 
-    ViolationType CheckForDllInjection();
-    ViolationType CheckForDebugger();
+    eagle_eye::ViolationType CheckForDllInjection();
+    eagle_eye::ViolationType CheckForDebugger();
 
 private:
     struct ProcessInfo
     {
         // Absolute path to the executable
         std::wstring exePath;
-        std::vector<std::wstring> startupModules;
     };
 
     // Info about the processes we monitor
     std::vector<ProcessInfo> processes;
 
-    // Checks if the process is running
-    // Updates ProcessInfo accordingly and returns a handle to the process
-    Process::ProcessHandle lookForProcess(ProcessInfo& process);
-
     // Returns true if malicious DLL injection is detected
     bool checkDLLInjection(Process::ProcessHandle& processHandle, const ProcessInfo& processInfo);
 
     bool isModuleVerified(const ProcessInfo& process, const std::wstring modulePath);
-
 };
 
 #endif // PROCESSMONITOR_H

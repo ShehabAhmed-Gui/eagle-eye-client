@@ -51,6 +51,6 @@ void CoreController::onMainProcessNotConnected()
     // Attempt to terminate every process of main app
     QVector<QString> files = FilesManager::getExeFiles(Utils::getMainAppLocation());
     for (const QString &file : std::as_const(files)) {
-        Process::killProcess(file);
+        Process::Management::killProcess(file);
     }
 }
