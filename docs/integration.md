@@ -146,7 +146,7 @@ Security considerations
 
 Troubleshooting
 ---------------
-EagleEye logs everything at: **C:/ProgramData/EagleEye/logs**, in case of EagleEye malfunction, send us the logs file. For contact information, look at the top-level readme file.
+EagleEye logs everything in: %windir%\\ProgramData\\EagleEye, in case of EagleEye malfunction, send us the logs file. For contact information, look at the top-level readme file.
 - If you receive invalid/empty messages, make sure you are using valid terminators as described in this documenation.
 - If you cannot connect to \\\\.\\pipe\\eagleeye:
   - Confirm EagleEye service is running.
