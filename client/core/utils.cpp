@@ -46,9 +46,6 @@ QByteArray Utils::getSecureKey()
 
     QByteArray output = process.readAllStandardOutput();
 
-    // TODO: remove this debug statement
-    logger.debug() << "Generated secure key:" << output;
-
     return output;
 }
 
