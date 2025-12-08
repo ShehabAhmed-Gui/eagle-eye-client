@@ -93,7 +93,7 @@ void DaemonConnection::parseCommand(QByteArray &command)
     if (cmd.toLower() == "token_request") {
         const QString appId = obj.value("app_id").toString();
         if (!compareAppId(appId)) {
-            logger.error() << "Received incorrect app id";
+            logger.error() << "Received incorrect app id -" << appId;
             return;
         }
 
